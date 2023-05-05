@@ -4,17 +4,21 @@ import time
 
 
 if "__main__" == __name__:
-    save_dir='vids/'
-
-    # TODO how to record to desktop?
+    save_dir='videos'
 
     with picamera.PiCamera() as camera:
         # TODO camera consistency?
         camera.resolution = (1024, 768)
         camera.start_preview()
-        time.sleep(10) # TODO need to determine when finished
-        camera.start_recording(f"mouse_video_{time.time()}.h264")
-        camera.wait_recording(30)
+        time.sleep(10)
+        # TODO need to determine when finished previewing
+        camera.stop_preview()
+
+        camera.start_recording(f"{save_dir}/mouse_video_{time.time()}.h264")
+        camera.wait_recording(30) # TODO need to determine when finished recording (in other code, passed to this code)
         camera.stop_recording()
 
-    
+    # TODO extract pupils using opencv
+    # https://subscription.packtpub.com/book/application-development/9781785283932/4/ch04lvl1sec44/detecting-pupils
+    # https://tech.paayi.com/pupil-detection-in-pyhton
+    # https://stackoverflow.com/questions/31658729/detecting-exact-pupil-diameter-in-python-and-opencv
