@@ -28,7 +28,6 @@ unsigned long datacounter;
 #define LICKPIN 11
 
 int temp;
-//const int savePin = 5;
 //String filename;
 String filenameWeb;
 String cleaneddatetime;
@@ -37,7 +36,7 @@ String dataString;
 double runtime;
 boolean real;
 
-//-SETUP-SETUP-SETUP-SETUP-SETUP-SETUP-SETUP-SETUP-------------------------------------------------------------------------------------
+//SETUP
 void setup() {
 
 
@@ -91,8 +90,6 @@ void setup() {
 
 }
 
-//------------------------------------------------------------------------------
-
 int Printprogressfile(String progressfiledata) {
   FileSystem.remove("/mnt/sda1/arduino/www/progressfile.txt");
   File dataFile = FileSystem.open("/mnt/sda1/arduino/www/progressfile.txt", FILE_APPEND); //open the file
@@ -116,8 +113,6 @@ int Printprogressfile(String progressfiledata) {
 
 
 
-//------------------------------------------------------------------------------
-
 String getTimeStamp() {
   String result;
   Process time;
@@ -139,7 +134,6 @@ String getTimeStamp() {
 }
 
 
-//-LOOP-LOOP-LOOP-LOOP-LOOP-LOOP-LOOP-LOOP--------------------------------------------------------------------------------------
 void loop() {
   dataString = ""; //helps to only print the date once
 
@@ -243,10 +237,6 @@ void loop() {
 
 
 
-
-  //}
-
-
   //-DATA-STRING-WRITING--------------------------------------------------------------------------------------
 
   if (!(blockedstart == 0) || !(puffstart == 0) || !(wait1start == 0) || !(wait2start == 0) || !(wait3start == 0)) { //if anything is triggered
@@ -309,8 +299,7 @@ void loop() {
 
 }
 
-//- END LOOP-ENDLOOP-END LOOP-END LOOP-END LOOP-END LOOP-END LOOP-END LOOP------------------------------------------------------------
-//------------------------------------------------------------------------------
+//END LOOP
 
 void datadump() {
 

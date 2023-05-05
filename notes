@@ -1,4 +1,88 @@
+Connection Diagram:
+
+air puff<-(relay)---------------
+walking---(encoder)------------>Arduino-(plaintext serial port)--->computer
+licks-----(capacitive sensor)-->   |                                 |
+                                   |                                 |
+                                   |                                 |
+                                   |                                 |
+                                   |(ttl pulse                       |
+                                   |high when air puff)              |
+                                   |                                 |
+                                   |                                 |
+                                   |                                 |
+                                   |                                 |
+                                   |                                 |
+                                   \/                                |
+                                Microscope-(MES matlab serial port)->|
+                                (olympus bxG1WI)                     |
+                                                                     |
+                                                                     |
+                                                                     |
+                                                                     |
+                                Laser-(Mai Tai 2.X serial port)----->|
+                                Mait Tai HP
+
+
+
 Capacitor switch used:
     https://www.adafruit.com/product/1374
+
+What we want to do:
+    set up the arduino to send a pulse when it starts recording
+        also send a pulse to the raspberry pi
+    hook up licking sensor to arduino
+    set up a raspberry pi to collect video
+        when it recieves a pulse from the arduino
+
+could:
+    set up raspberry pi to replace arduino
+
+New diagram:
+    air puff<-(relay)---------------
+    walking---(encoder)------------>Arduino-(plaintext serial port)--->computer
+    licks-----(capacitive sensor)-->  ||                                 |
+                                      ||                                 |
+                           ttl pulse  ||                                 |
+                           when start ||                                 |
+                                      ||(ttl pulse                       |
+                                      ||high when air puff)              |
+                                      ||                                 |
+                                      ||                                 |
+             -------------------------+|                                 |
+             |                        ||                                 |
+             |                        ||                                 |
+             \/                       \/                                 |
+           raspberry pi camera      Microscope-(MES matlab serial port)->|
+                                    (olympus bxG1WI)                     |
+                                                                         |
+                                                                         |
+                                                                         |
+                                                                         |
+                                    Laser-(Mai Tai 2.X serial port)----->|
+                                    Mait Tai HP
+OR
+    air puff<-(relay)---------------
+    walking---(encoder)------------>Raspberry Pi (plaintext serial port)->computer
+    licks-----(capacitive sensor)-->   |                                   |
+                                       |                                   |
+                                       |                                   |
+                                       |                                   |
+                                       |(ttl pulse                         |
+                                       |high when air puff)                |
+                                       |                                   |
+                                       |                                   |
+                                       |                                   |
+                                       |                                   |
+                                       |                                   |
+                                       \/                                  |
+                                    Microscope-(MES matlab serial port)--->|
+                                    (olympus bxG1WI)                       |
+                                                                           |
+                                                                           |
+                                                                           |
+                                                                           |
+                                    Laser-(Mai Tai 2.X serial port)------->|
+                                    Mait Tai HP
 
 
