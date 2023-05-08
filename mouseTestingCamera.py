@@ -4,7 +4,7 @@ import time
 # TODO incorporate this into mouseTesting.py
 
 if "__main__" == __name__:
-    save_dir='videos'
+    save_dir='data'
 
     with picamera.PiCamera() as camera:
         camera.start_recording(f"{save_dir}/mouse_video_{time.time()}.h264")
