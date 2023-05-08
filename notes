@@ -33,6 +33,8 @@ What we want to do:
     arduino sends a ttl pusle to microscope when it starts recording
     raspberry pi collects and processes video real time using opencv
         ssh -X to see it
+        raspberry pi model 3b v1.2
+        https://www.raspberrypi.com/software/operating-systems/
 
 New diagram:
     air puff<-(relay)---------------
