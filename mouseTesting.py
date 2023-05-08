@@ -3,6 +3,7 @@
 """
 Air puff stimulator for raspberry pi
 """
+
 import random
 import time
 
@@ -22,7 +23,7 @@ puff_water_delay = 0.5 # seconds
 # time for water duration
 water_duration = 0.075 # seconds
 # z, time between end of puff and beginning of next puff within a train
-puff_puff_delay = 19.5 # seconds
+inter_puff_delay = 19.5 # seconds
 # x, number of  puffs in a train
 num_puffs_in_train = 20
 # n, number of trains in a trial
@@ -35,7 +36,7 @@ water_prob = 50 # %
 SOLENOID_PIN = 2
 TTL_PULSE_PIN = 7
 FAKE_SOLENOID_PIN = 3
-WATER_PIN = 4 # TODO rename
+WATER_PIN = 4 # TODO rename ?
 BUILTIN_LED_PIN = 1
 
 def setup():
@@ -56,38 +57,41 @@ def main():
     """Run test"""
     time.sleep(initial_delay)
 
+    count = 0
+
     for train_counter in range(num_trains_in_trial):
         for puff_counter in range(num_puffs_in_train):
 
             # randomly choose whether to use a real solenoid or a fake one
             tmp_solenoid_pin = FAKE_SOLENOID_PIN
+            puff_string = "fake"
             if (random.random() * 100 > water_prob):
                 tmp_solenoid_pin = SOLENOID_PIN
+                puff_string = "real"
 
             # air puff / fake air puff
             GPIO.output(tmp_solenoid_pin, GPIO.HIGH)
-            ms_on = time.time()
+            solenoid_on = time.monotonic_ns()
             GPIO.output(TTL_PULSE_PIN, GPIO.HIGH)
             time.sleep(air_time)
             GPIO.output(tmp_solenoid_pin, GPIO.LOW)
-            ms_off = time.time()
+            solenoid_off = time.monotonic_ns()
             GPIO.output(TTL_PULSE_PIN, GPIO.LOW)
+            count += 1
 
             time.sleep(puff_water_delay)
 
             # TODO ??? what does water pin do?
             GPIO.output(WATER_PIN, GPIO.HIGH)
-            w_on = time.time()
+            water_on = time.monotonic_ns()
             time.sleep(water_duration)
             GPIO.output(WATER_PIN, GPIO.LOW)
-            w_off = time.time()
-            time.sleep(puff_puff_delay)
+            water_off = time.monotonic_ns()
+            time.sleep(inter_puff_delay)
             puff_counter += 1
-            print(f"Puff, {ct}, {ms_on}, {ms_off}, {w_on}, {w_off}") # TODO time formatting?
+            print(f"{puff_string}, {count}, {solenoid_on}, {solenoid_off}, {water_on}, {water_off}") # TODO nanosecond to microseconds?
 
         time.sleep(train_delay)
-
-    # TODO if can't get ip address from CMU, then make it flash the lights
 
 # TODO save to file and save it with the current year-month-day-hour-min-second
 
