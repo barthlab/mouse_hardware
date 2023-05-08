@@ -89,7 +89,7 @@ def main():
 
     # TODO if can't get ip address from CMU, then make it flash the lights
 
-
+# TODO save to file and save it with the current year-month-day-hour-min-second
 
 if "__main__" == __name__:
     setup()
