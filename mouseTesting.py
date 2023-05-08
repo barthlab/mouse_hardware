@@ -4,11 +4,11 @@
 Air puff stimulator for raspberry pi
 """
 
+import csv
 import random
 import time
 
 import GPIO
-
 
 
 # for trouble shooting or testing, use initialDelay = 1000, trialDelay = 500, airTime=10, offTime = 250
@@ -36,7 +36,7 @@ water_prob = 50 # %
 SOLENOID_PIN = 2
 TTL_PULSE_PIN = 7
 FAKE_SOLENOID_PIN = 3
-WATER_PIN = 4 # TODO rename ?
+WATER_PIN = 4 # TODO rename and what does the water pin do?
 BUILTIN_LED_PIN = 1
 
 def setup():
@@ -59,41 +59,42 @@ def main():
 
     count = 0
 
-    for train_counter in range(num_trains_in_trial):
-        for puff_counter in range(num_puffs_in_train):
+    with open(f"{int(time.time())}.csv", "w") as csvfile:
+        csvwriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+        for train_counter in range(num_trains_in_trial):
+            for puff_counter in range(num_puffs_in_train):
 
-            # randomly choose whether to use a real solenoid or a fake one
-            tmp_solenoid_pin = FAKE_SOLENOID_PIN
-            puff_string = "fake"
-            if (random.random() * 100 > water_prob):
-                tmp_solenoid_pin = SOLENOID_PIN
-                puff_string = "real"
+                # randomly choose whether to use a real solenoid or a fake one
+                tmp_solenoid_pin = FAKE_SOLENOID_PIN
+                puff_string = "fake"
+                if (random.random() * 100 > water_prob):
+                    tmp_solenoid_pin = SOLENOID_PIN
+                    puff_string = "real"
 
-            # air puff / fake air puff
-            GPIO.output(tmp_solenoid_pin, GPIO.HIGH)
-            solenoid_on = time.monotonic_ns()
-            GPIO.output(TTL_PULSE_PIN, GPIO.HIGH)
-            time.sleep(air_time)
-            GPIO.output(tmp_solenoid_pin, GPIO.LOW)
-            solenoid_off = time.monotonic_ns()
-            GPIO.output(TTL_PULSE_PIN, GPIO.LOW)
-            count += 1
+                # air puff / fake air puff
+                GPIO.output(tmp_solenoid_pin, GPIO.HIGH)
+                solenoid_on = time.monotonic_ns()
+                GPIO.output(TTL_PULSE_PIN, GPIO.HIGH)
+                time.sleep(air_time)
+                GPIO.output(tmp_solenoid_pin, GPIO.LOW)
+                solenoid_off = time.monotonic_ns()
+                GPIO.output(TTL_PULSE_PIN, GPIO.LOW)
+                count += 1
 
-            time.sleep(puff_water_delay)
+                time.sleep(puff_water_delay)
 
-            # TODO ??? what does water pin do?
-            GPIO.output(WATER_PIN, GPIO.HIGH)
-            water_on = time.monotonic_ns()
-            time.sleep(water_duration)
-            GPIO.output(WATER_PIN, GPIO.LOW)
-            water_off = time.monotonic_ns()
-            time.sleep(inter_puff_delay)
-            puff_counter += 1
-            print(f"{puff_string}, {count}, {solenoid_on}, {solenoid_off}, {water_on}, {water_off}") # TODO nanosecond to microseconds?
+                GPIO.output(WATER_PIN, GPIO.HIGH)
+                water_on = time.monotonic_ns()
+                time.sleep(water_duration)
+                GPIO.output(WATER_PIN, GPIO.LOW)
+                water_off = time.monotonic_ns()
+                time.sleep(inter_puff_delay)
+                puff_counter += 1
+                csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off]) # TODO nanosecond to microseconds?
 
-        time.sleep(train_delay)
+            time.sleep(train_delay)
 
-# TODO save to file and save it with the current year-month-day-hour-min-second
+
 
 if "__main__" == __name__:
     setup()
