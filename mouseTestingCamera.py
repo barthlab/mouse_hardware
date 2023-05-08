@@ -7,13 +7,6 @@ if "__main__" == __name__:
     save_dir='videos'
 
     with picamera.PiCamera() as camera:
-        # TODO camera consistency?
-        camera.resolution = (1024, 768)
-        camera.start_preview()
-        time.sleep(10)
-        # TODO need to determine when finished previewing
-        camera.stop_preview()
-
         camera.start_recording(f"{save_dir}/mouse_video_{time.time()}.h264")
         camera.wait_recording(30) # TODO need to determine when finished recording (in other code, passed to this code)
         camera.stop_recording()
