@@ -1,4 +1,3 @@
-
 # Web streaming example
 # Source code from the official PiCamera package
 # http://picamera.readthedocs.io/en/latest/recipes2.html#web-streaming
@@ -94,5 +93,7 @@ with picamera.PiCamera() as camera:
         server.serve_forever()
     finally:
         camera.stop_recording()
-   
+
+# TODO simply the code
+# TODO display only once?
 
