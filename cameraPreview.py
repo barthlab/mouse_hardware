@@ -38,7 +38,7 @@ def generate_ssl_certificate(
   organizationUnitName="organizationUnitName",
   serialNumber=0,
   validityStartInSeconds=0,
-  validityEndInSeconds=100*365*24*60*60,
+  validityEndInSeconds=10*365*24*60*60,
   key_file="private.key",
   cert_file="selfsigned.crt"):
   # create a key pair
