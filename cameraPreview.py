@@ -1,3 +1,5 @@
+#!/bin/env python3
+
 from http import server
 import io
 import socket
