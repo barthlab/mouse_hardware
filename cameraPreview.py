@@ -113,6 +113,7 @@ if "__main__" == __name__:
       address = get_current_private_ip()
       server = StreamingServer((address, PORT), StreamingHandler)
       print(f"http://{address}:{PORT}/index.html")
+      print("If you are unable to connect to the server, restart this program")
       print("Press CTRL+C to exit")
       server.handle_request()
       server.handle_request()
