@@ -12,6 +12,7 @@ import socket
 import picamera
 
 CAMERA_RESOLUTION = (1024, 768)
+PORT = 8080
 
 PAGE=f"""\
 <html>
@@ -98,6 +99,7 @@ with picamera.PiCamera() as camera:
   try:
     address = get_current_private_ip()
     server = StreamingServer((address, PORT), StreamingHandler)
+    print(f"http://{address}:{PORT}")
     server.handle_request()
   finally:
     camera.stop_recording()
