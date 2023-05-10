@@ -163,7 +163,7 @@ if "__main__" == __name__:
     if os.path.isfile(KEY_FILE):
       os.remove(KEY_FILE)
 
-    generate_ssl_certificate(key_file=KEY_FILE, cert_file=CERT_FILE)
+    generate_ssl_certificate(serialNumber=int(time.time()), key_file=KEY_FILE, cert_file=CERT_FILE)
 
   else:
     print("Found certificate file and key file")
