@@ -2,9 +2,11 @@
 
 from http import server
 import io
+import os
+import OpenSSL
 import socket
 import socketserver
-import sys
+import ssl
 import threading
 import time
 
@@ -13,14 +15,55 @@ import picamera
 
 
 CAMERA_RESOLUTION = (1024, 768)
-PORT = 8080
-PAGE=f"""\
+PORT = 4443
+KEY_FILE = "/tmp/camera_preview_server.key"
+CERT_FILE = "/tmp/camera_preview_server.crt"
+PAGE = f"""\
 <html>
 <body>
 <img src="stream.mjpg" width="{CAMERA_RESOLUTION[0]}" height="{CAMERA_RESOLUTION[1]}"/>
 </body>
 </html>
 """
+
+
+
+def generate_ssl_certificate(
+  emailAddress="emailAddress",
+  commonName="commonName",
+  countryName="CN",
+  localityName="localityName",
+  stateOrProvinceName="stateOrProvinceName",
+  organizationName="organizationName",
+  organizationUnitName="organizationUnitName",
+  serialNumber=0,
+  validityStartInSeconds=0,
+  validityEndInSeconds=2147483647, #100*365*24*60*60,
+  key_file="private.key",
+  cert_file="selfsigned.crt"):
+  # create a key pair
+  key = OpenSSL.crypto.PKey()
+  key.generate_key(OpenSSL.crypto.TYPE_RSA, 4096)
+
+  # create a self-signed cert
+  cert = OpenSSL.crypto.X509()
+  cert.get_subject().C = countryName
+  cert.get_subject().ST = stateOrProvinceName
+  cert.get_subject().L = localityName
+  cert.get_subject().O = organizationName
+  cert.get_subject().OU = organizationUnitName
+  cert.get_subject().CN = commonName
+  cert.get_subject().emailAddress = emailAddress
+  cert.set_serial_number(serialNumber)
+  cert.gmtime_adj_notBefore(0)
+  cert.gmtime_adj_notAfter(validityEndInSeconds)
+  cert.set_issuer(cert.get_subject())
+  cert.set_pubkey(key)
+  cert.sign(key, "sha512")
+  with open(cert_file, "wt") as f:
+    f.write(OpenSSL.crypto.dump_certificate(OpenSSL.crypto.FILETYPE_PEM, cert).decode("utf-8"))
+  with open(key_file, "wt") as f:
+    f.write(OpenSSL.crypto.dump_privatekey(OpenSSL.crypto.FILETYPE_PEM, key).decode("utf-8"))
 
 
 
@@ -105,6 +148,16 @@ class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
 
 
 if "__main__" == __name__:
+  if not os.path.isfile(CERT_FILE) or not os.path.isfile(KEY_FILE):
+    print("Could not find certificate file and key file")
+    print("Generating new certificate file and key file")
+    if os.path.isfile(CERT_FILE):
+      os.remove(CERT_FILE)
+    if os.path.isfile(KEY_FILE):
+      os.remove(KEY_FILE)
+    generate_ssl_certificate(key_file=KEY_FILE, cert_file=CERT_FILE)
+  else:
+    print("Found certificate file and key file")
   with picamera.PiCamera() as camera:
     camera.resolution = CAMERA_RESOLUTION
     output = StreamingOutput()
@@ -112,9 +165,10 @@ if "__main__" == __name__:
     try:
       address = get_current_private_ip()
       server = StreamingServer((address, PORT), StreamingHandler)
-      print(f"http://{address}:{PORT}/index.html")
-      print("If you are unable to connect to the server, restart this program")
+      server.socket = ssl.wrap_socket(server.socket, keyfile=KEY_FILE, certfile=CERT_FILE, server_side=True)
+      print(f"https://{address}:{PORT}/index.html")
       print("Press CTRL+C to exit")
+      server.handle_request()
       server.handle_request()
       server.handle_request()
       while True:
