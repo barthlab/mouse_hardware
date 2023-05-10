@@ -96,7 +96,7 @@ with picamera.PiCamera() as camera:
     address = get_current_private_ip()
     server = StreamingServer((address, PORT), StreamingHandler)
     print(f"http://{address}:{PORT}")
-    server.handle_request()
+    server.serve_forever()
   finally:
     camera.stop_recording()
 
