@@ -6,7 +6,7 @@ import io
 import logging
 import socketserver
 import threading
-import http
+from http import server
 import socket
 
 import picamera
@@ -46,7 +46,7 @@ class StreamingOutput(object):
         self.buffer.seek(0)
     return self.buffer.write(buf)
 
-class StreamingHandler(http.server.BaseHTTPRequestHandler):
+class StreamingHandler(server.BaseHTTPRequestHandler):
   def do_GET(self):
     if self.path == '/':
       self.send_response(301)
@@ -85,7 +85,7 @@ class StreamingHandler(http.server.BaseHTTPRequestHandler):
       self.send_error(404)
       self.end_headers()
 
-class StreamingServer(socketserver.ThreadingMixIn, http.server.HTTPServer):
+class StreamingServer(socketserver.ThreadingMixIn, server.HTTPServer):
   allow_reuse_address = True
   daemon_threads = True
 
