@@ -32,10 +32,24 @@ What we want to do:
     set up raspberry pi to replace arduino
     arduino sends a ttl pusle to microscope when it starts recording
     raspberry pi collects and processes video real time using opencv
+        MAC = b8:27:eb:2C:7E:5C
+            can ip address be viewed through the website?
+            sudo raspi-config
+                need to enable camera through settings
+                need to enable ssh through settings
+                need to enable vnc through settings
+            pi doesn't require an ethernet cable bc it has wifi
         need to enable ssh on rpi
-        connect to eth0
-            can this be viewed through the website?
         ssh -X to see it
+            can't do this because everything is displayed ata very low level by the gpu
+            instead:
+                on rpi:
+                    raspivid -t 0 -l -o tcp://0.0.0.0:3333
+                on computer:
+                    vlc tcp/h264://172.26.199.35:3333
+            or:
+                pip3 install pyshine cv2
+                and run the code in cameraPreview.py
         raspberry pi model 3b v1.2
         https://www.raspberrypi.com/software/operating-systems/
 
