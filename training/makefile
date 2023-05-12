@@ -8,4 +8,4 @@ list:
 	sudo arduino-cli board list
 
 monitor:
-	alacritty -e sudo screen /dev/ttyACM0 9600
+	alacritty -e sudo screen /dev/ttyACM0 9600 # look into sudo arduino-cli monitor -p /dev/ttyACM0
