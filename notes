@@ -1,0 +1,14 @@
+hostname = barthlabpi
+MAC = B8:27:EB:2C:7E:5C
+
+Ethernet password -> install Arduino
+
+pw = barthlab
+    192.168.137.4
+    netmask: 255.255.255.0
+    MAC: 00-E0-8C-68-02-B3
+    192.168.137.4/24
+
+SLC051 IR - last imaged ?Jan/Jun? 13
+SLC048 IL -
+SLC056 IR
