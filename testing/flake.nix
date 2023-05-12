@@ -10,13 +10,11 @@
         allowUnfree = true;
       };
     };
-    let
-      pythonPackages = python3Packages;
-    in
       mkShell {
-        buildInputs = with pkgs; [
-          python3Full
-
+        buildInputs = [
+          pkgs.python3Full
+          pkgs.python3Packages.numpy
+          (pkgs.python3Packages.opencv4.override {enableGtk2 = true;})
         ];
 
         shellHook = ''
@@ -25,4 +23,3 @@
       };
   };
 }
-
