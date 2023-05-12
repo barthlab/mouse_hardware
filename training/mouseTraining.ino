@@ -73,6 +73,7 @@ void setup() {
   }
 
   randomSeed(analogRead(A0)); //randomizes number for delay
+  // TODO why is there delay here?
 
   while (digitalRead(LICKPIN)) { //if the lick pin is on when the arduino is on then delay so voltage can stabilize
     temp = Printprogressfile("initializing");
