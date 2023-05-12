@@ -2,7 +2,7 @@ import picamera
 import time
 
 # TODO incorporate this into mouseTesting.py
-SAVE_DIR='data'
+SAVE_DIR='../data'
 
 if "__main__" == __name__:
   with picamera.PiCamera() as camera:

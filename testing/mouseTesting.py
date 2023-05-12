@@ -27,7 +27,7 @@ num_trains_in_trial = 1
 # probability of receiving water
 water_prob = 50 # %
 
-dir = "data"
+dir = "../data"
 
 # TODO change these numbers
 SOLENOID_PIN = 2
