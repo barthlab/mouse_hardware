@@ -10,15 +10,14 @@
       mkShell {
         buildInputs = with pkgs; [
           arduino-cli
-          bubblewrap
           gnumake
           screen
         ];
 
         shellHook = ''
-          sysctl kernel.unprivileged_userns_clone=1
+          sudo sysctl kernel.unprivileged_userns_clone=1
           zsh
-          sysctl kernel.unprivileged_userns_clone=0
+          sudo sysctl kernel.unprivileged_userns_clone=0
           exit'';
       };
   };

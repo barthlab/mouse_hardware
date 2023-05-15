@@ -7,13 +7,13 @@ help:
 	cat ./makefile
 
 upload:
-	sudo arduino-cli compile -u -b $(FQBN) -p $(serial_port) ./
+	arduino-cli compile -u -b $(FQBN) -p $(serial_port) ./
 
 compile:
-	sudo arduino-cli compile -b $(FQBN) -p $(serial_port) ./
+	arduino-cli compile -b $(FQBN) -p $(serial_port) ./
 
 list:
-	sudo arduino-cli board list
+	arduino-cli board list
 
 monitor:
-	alacritty -e sudo screen $(serial_port) $(baud_rate) # look into sudo arduino-cli monitor -p /dev/ttyACM0
+	alacritty -e screen $(serial_port) $(baud_rate) # look into sudo arduino-cli monitor -p /dev/ttyACM0
