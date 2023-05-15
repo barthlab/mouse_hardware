@@ -1,3 +1,7 @@
+
+help:
+	cat ./makefile
+
 upload:
 	sudo arduino-cli compile -u -b arduino:avr:uno -p /dev/ttyACM0 ./
 
