@@ -15,9 +15,7 @@
         ];
 
         shellHook = ''
-          sudo sysctl kernel.unprivileged_userns_clone=1
           zsh
-          sudo sysctl kernel.unprivileged_userns_clone=0
           exit'';
       };
   };
