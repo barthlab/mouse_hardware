@@ -1,70 +1,13 @@
 Connection Diagram:
-
-air puff<-(relay)---------------
-walking---(encoder)------------>Arduino-(plaintext serial port)--->computer
-licks-----(capacitive sensor)-->   |                                ^^
-                                   |                                ||
-                                   |                                ||
-                                   |                                ||
-                                   |(ttl pulse                      ||
-                                   |high when air puff)             ||
-                                   |                                ||
-                                   |                                ||
-                                   |                                ||
-                                   |                                ||
-                                   |                                ||
-                                   V                                ||
-                                Microscope-(MES matlab serial port)-||
-                                (olympus bxG1WI)                     |
-                                                                     |
-                                                                     |
-                                                                     |
-                                                                     |
-                                Laser-(Mai Tai 2.X serial port)------|
-                                Mait Tai HP
-
-
-
-Capacitor switch used:
-    https://www.adafruit.com/product/1374
-
-What we want to do:
-     set up raspberry pi to replace arduino
-     arduino sends a ttl pusle to microscope when it starts recording
-     raspberry pi collects and processes video real time using opencv
-         MAC = b8:27:eb:2C:7E:5C
-             can ip address be viewed through the website?
-             sudo raspi-config
-                 need to enable camera through settings
-                 need to enable ssh through settings
-                 need to enable vnc through settings
-             pi doesn't require an ethernet cable bc it has wifi
-         need to enable ssh on rpi
-         ssh -X to see it
-             can't do this because everything is displayed ata very low level by the gpu
-             instead:
-                 on rpi:
-                     raspivid -t 0 -l -o tcp://0.0.0.0:3333
-                 on computer:
-                     vlc tcp/h264://172.26.199.35:3333
-             or:
-                 pip3 install pyshine cv2
-                 and run the code in cameraPreview.py
-         raspberry pi model 3b v1.2
-         https://www.raspberrypi.com/software/operating-systems/
-
-
-
-New diagram:
     air puff<-(relay)---------------
     walking---(encoder)------------>Raspberry Pi ---(ssh)-------------->computer
     licks-----(capacitive sensor)-->  ||                                  ^^
                                       ||                                  ||
                                       ||                                  ||
                                       ||                                  ||
-                           ttl pulse  ||(ttl pulse                        ||
-                           when start ||high when air puff)               ||
-                                      ||                                  ||
+                            ttl pulse || ttl pulse                        ||
+                            for video || high when                        ||
+                            recording || air puff                         ||
                                       ||                                  ||
                                       ||                                  ||
                                       ||                                  ||
@@ -80,3 +23,23 @@ New diagram:
                                     Mait Tai HP
 
 
+Raspberry Pi Information:
+    ssh user@barthlabrpi.wifi.local.cmu.edu
+    password = check Alex's notebook, page 3
+    MAC = b8:27:eb:79:2b:09
+    raspberry pi model 3b v1.2
+    view ip address through getonline.cmu.edu
+    reinstall rpi:
+        https://www.raspberrypi.com/software/operating-systems/
+        commands to set up the pi:
+            sudo raspi-config
+                enable camera
+                enable ssh
+
+
+Capacitor switch used:
+    https://www.adafruit.com/product/1374
+
+What we want to do:
+     arduino sends a ttl pusle to microscope when it starts recording
+     arduino wiring
