@@ -1,321 +1,144 @@
-#include "Adafruit_MPR121.h"
 #include <FileIO.h>
 
-unsigned long time;
-unsigned long wait3start;
-unsigned long puffstart;
-unsigned long blockedstart;
-unsigned long wait2start;
-unsigned long pufftime;
-unsigned long wait3time;
-unsigned long pumptime;
-unsigned long wait2time;
-unsigned long waterprob;
-unsigned long touch;
-unsigned long lastwrite;
-unsigned long npump;
-unsigned long wait1start;
-unsigned long wait1time;
-unsigned long loopdelay;
-char printdata[45][23];
-unsigned long datacounter;
-#define relayPinPump 8
-#define relayPinPuff 7
-#define relayPinFake 2
-#define relayPinFakeTwo 10
+// PINS
+const int REAL_AIR_PIN = 7;
+const int FAKE_AIR_PIN = 2;
+const int REAL_WATER_PIN = 8;
+const int FAKE_WATER_PIN = 10;
+const int IR_SENSOR_PIN = 4;
+const int LICK_CAPACITIVE_SENSOR_PIN = 11;
+const int DISCONNECTED_ANALOG_PIN_0 = 14;
 
-#define SENSORPIN 4
-#define LICKPIN 11
+// File Save Dir
+const char storage_file_dir = "/mnt/sda1/arduino/www/temptest.txt"; // TODO redo filename
+char storage_file;
 
-int temp;
-//String filename;
-String filenameWeb;
-String cleaneddatetime;
-boolean recording;
-String dataString;
-double runtime;
-boolean real;
+// USER Modifiable Variables
+const unsigned long probability_of_water = 80; // %
+const unsigned long min_delay_time = 200; // milliseconds
+const unsigned long max_delay_time = 800; // milliseconds
+const unsigned long air_puff_time = 500; // milliseconds
+const unsigned long water_release_time = 75; // milliseconds
+const unsigned long air_puff_end_to_water_release_start_time = 500; // milliseconds
+const unsigned long water_release_end_to_check_IR_blocked_time = 725; // milliseconds
 
-//SETUP
-void setup() {
-
-
-  npump = 0; //set number of pumps at 0
-  wait3start = 0; //set pausestart at 0
-  puffstart = 0; //set puffstart at 0
-  blockedstart = 0; //set blockedstart at 0
-  wait2start = 0; //set firstpausestart at 0
-  wait1start = 0; //set wait1start at 0
-  wait1time = 0; //set wait1time at 0
-  loopdelay = 100; //delay for arduino so its not too fast
-  pufftime = 500; //pufftime lasts for x milliseconds
-  wait2time = 500; //firstpausetime lasts for x milliseconds
-  wait3time = 925; //pausetime lasts for x milliseconds
-  pumptime = 75; //pumptime lasts for x milliseconds
-  waterprob = 80; //probablity of watering (a percent)
-  datacounter = 0;
-  // initialize the sensor pin as an input:
-  pinMode(SENSORPIN, INPUT);
-  digitalWrite(SENSORPIN, HIGH); // turn on the pullup
-  pinMode(relayPinPump, OUTPUT);
-  pinMode(relayPinPuff, OUTPUT);
-  pinMode(relayPinFake, OUTPUT);
-  pinMode(relayPinFakeTwo, OUTPUT);
-  pinMode(LICKPIN, INPUT);
-
-  Bridge.begin();
-  FileSystem.begin();
-  FileSystem.remove("/mnt/sda1/arduino/www/progressfile.txt");
-  File dataFile = FileSystem.open("/mnt/sda1/arduino/www/progressfile.txt", FILE_APPEND); //open the file
-  if (dataFile) { //if the file is available, write to it
-    dataFile.println("Starting");
-    dataFile.close();
-  }
-
-  randomSeed(analogRead(A0)); //randomizes number for delay
-  // TODO why is there delay here?
-
-  while (digitalRead(LICKPIN)) { //if the lick pin is on when the arduino is on then delay so voltage can stabilize
-    temp = Printprogressfile("initializing");
-    delay(1000);
-  }
-
-  //pinMode(savePin, INPUT); //switch is an input
-  //recording = false; //no recording
-
-  cleaneddatetime += getTimeStamp(); //the cleaneddatetime is the date and time
-  cleaneddatetime.replace("/", "_"); //replace with an underscore
-  cleaneddatetime.replace("-", "~T~"); //replace with a T
-  cleaneddatetime.replace(":", "_"); //replace with an underscore
-  filenameWeb += "/mnt/sda1/arduino/www/temptest.txt" + cleaneddatetime += ".txt";
-
+// reading from a pin that isn't attached to anything gives us a random value
+// the value is more likely to be unbiased the smaller the bit is because
+// smaller random variations lead to larger changes, so we use the smallest
+// bit of a disconnected analog pin
+bool get_random_bit(const int DISCONNECTED_ANALOG_PIN) {
+    return (1 & analogRead(DISCONNECTED_ANALOG_PIN));
 }
 
-int Printprogressfile(String progressfiledata) {
-  FileSystem.remove("/mnt/sda1/arduino/www/progressfile.txt");
-  File dataFile = FileSystem.open("/mnt/sda1/arduino/www/progressfile.txt", FILE_APPEND); //open the file
-  if (dataFile) { //if the file is available, write to it
-    /*    dataFile.println("Puff Time in ms");
-        dataFile.println(String(pufftime));
-        dataFile.println("First Pause Time in ms");
-        dataFile.println(String(wait2time));
-        dataFile.println("Pause Time in ms");
-        dataFile.println(String(wait3time));
-        dataFile.println("Pump Time in ms");
-        dataFile.println(String(pumptime));
-        dataFile.println("Water Probability in %");
-        dataFile.println(String(waterprob));
-    */    dataFile.println(progressfiledata);
-    dataFile.close();
-  }
-  return 0;
-
-}
-
-
-
-String getTimeStamp() {
-  String result;
-  Process time;
-  // date is a command line utility to get the date and the time
-  // in different formats depending on the additional parameter
-  time.begin("date");
-  time.addParameter("+%D-%T");  // parameters: D for the complete date mm/dd/yy
-  //             T for the time hh:mm:ss
-  time.run();  // run the command
-
-  // read the output of the command
-  while (time.available() > 0) {
-    char c = time.read();
-    if (c != '\n') {
-      result += c;
+// use get_random_bit to make a random unsigned long (which is what randomSeed takes in)
+unsigned long get_random_UL(const int DISCONNECTED_ANALOG_PIN) {
+    const int number_of_bits_in_UL = 32;
+    unsigned long out = 0;
+    for (int i = 0; i < number_of_bits_in_UL; i++) {
+        out |= get_random_bit(DISCONNECTED_ANALOG_PIN);
+        out << 1;
     }
-  }
-  return result;
+    return (out);
 }
 
+String getCleanedTimeStamp() {
+    String result;
+    Process get_time;
+    get_time.begin("date");
+    get_time.addParameter("+%D-%T");
+    // format: MM/DD/YY-HH:MM:SS
+    // TODO assumes dragino has an internet connection
+    get_time.run();
+
+    // read the output of the command
+    while (get_time.available() > 0) {
+        char c = get_time.read();
+        if (c != '\n') {
+            result += c;
+        }
+    }
+
+    result.replace("/", "_");
+    result.replace("-", "~T~");
+    result.replace(":", "_");
+    // format: MM_DD_YY~T~HH_MM_SS
+
+    return result;
+}
+
+void setup() {
+    pinMode(REAL_AIR_PIN, INPUT);
+    pinMode(FAKE_AIR_PIN, INPUT);
+    pinMode(REAL_WATER_PIN, INPUT);
+    pinMode(FAKE_WATER_PIN, INPUT);
+    pinMode(IR_SENSOR_PIN, INPUT);
+    pinMode(LICK_CAPACITIVE_SENSOR_PIN, INPUT);
+    pinMode(DISCONNECTED_ANALOG_PIN_0, INPUT);
+
+    // TODO why are we making IR_SENSOR_PIN pull up?
+    digitalWrite(IR_SENSOR_PIN, HIGH);
+
+    // TODO redo format
+    String cleaneddatetime = getCleanedTimeStamp();
+
+    // create storage_file string
+    storage_file = (storage_file_dir + cleaneddatetime + ".txt").c_str();
+
+
+    // https://docs.arduino.cc/retired/archived-libraries/YunBridgeLibrary
+    Bridge.begin();
+    FileSystem.begin();
+
+    // read an analog pin that is not connected to get a random number
+    randomSeed(get_random_UL(DISCONNECTED_ANALOG_PIN_0));
+
+// TODO ???
+//    while (digitalRead(LICKPIN)) { //if the lick pin is on when the arduino is initializing then delay so voltage can stabilize
+//        delay(1000);
+//    }
+}
+
+void write_data(char filename, String input_string) {
+    File data_file = FileSystem.open(filename, FILE_APPEND);
+    if (data_file) {
+        data_file.println(input_string.c_str());
+        data_file.close();
+    }
+}
 
 void loop() {
-  dataString = ""; //helps to only print the date once
+    if (!digitalRead(IR_SENSOR_PIN)) {
+        unsigned long real = random(100) < probability_of_water;
+        unsigned int air_pin = REAL_AIR_PIN ? real : FAKE_AIR_PIN;
+        unsigned int water_pin = REAL_WATER_PIN ? real : FAKE_WATER_PIN;
+        // NOTE: can have issue if max_delay_time + 1 overflows
+        unsigned long random_delay_time = (unsigned long) random(min_delay_time, max_delay_time + 1);
 
-  if  (!digitalRead(SENSORPIN)) { //if sensor is blocked
-    if ((puffstart == 0) && (wait3start == 0) &&  (wait2start == 0) && (wait1start == 0)) { //if nothing is on
-      blockedstart = millis(); //start blocked start
+        // TODO redo data format (time (millis?), digitalRead(IR_SENSOR_PIN), digitalRead(LICK_CAPACITIVE_SENSOR_PIN), random_delay_time)
+
+        // TODO verify that write_data takes on the order of microseconds
+        write_data(storage_file, String(millis() / 1000) + "," + String(digitalRead(IR_SENSOR_PIN)) + "," + String(digitalRead(LICK_CAPACITIVE_SENSOR_PIN) << 1) + "," + (real ? "3" : "9") + "," + "0");
+
+        delay(random_delay_time);
+
+        digitalWrite(air_pin, HIGH);
+        write_data(storage_file, String(millis() / 1000) + "," + String(digitalRead(IR_SENSOR_PIN)) + "," + String(digitalRead(LICK_CAPACITIVE_SENSOR_PIN) << 1) + "," + (real ? "4" : "9") + "," + "0");
+        delay(air_puff_time);
+        digitalWrite(air_pin, LOW);
+
+        delay(air_puff_end_to_water_release_start_time);
+
+        digitalWrite(water_pin, HIGH);
+        write_data(storage_file, String(millis() / 1000) + "," + String(digitalRead(IR_SENSOR_PIN)) + "," + String(digitalRead(LICK_CAPACITIVE_SENSOR_PIN) << 1) + "," + (real ? "5" : "9") + "," + "0");
+        delay(water_release_time);
+        digitalWrite(water_pin, LOW);
+
+        write_data(storage_file, String(millis() / 1000) + "," + String(digitalRead(IR_SENSOR_PIN)) + "," + String(digitalRead(LICK_CAPACITIVE_SENSOR_PIN) << 1) + "," + (real ? "7" : "9") + "," + "0");
+
+        delay(water_release_end_to_check_IR_blocked_time);
+
+        // wait until mouse has stopped being in the IR beam
+        while (!digitalRead(IR_SENSOR_PIN)) {};
     }
-    else {
-      blockedstart = 0;
-    }
-  }
-
-  //-BLOCKED--------------------------------------------------------------------------------------
-
-  if (blockedstart > 0) { //what happens if sensor is blocked
-    blockedstart = 0;
-    if (random(100) < waterprob) { //randomizes when the pump/puff turns on
-      real = true; //goes into real phase
-    }
-    else {
-      real = false; //goes into fake phase
-    }
-    wait1time = random(200, 801); //pick a random number between 200 and 800
-    wait1start = millis(); //start the first wait time
-  }
-
-  //-WAIT1START--------------------------------------------------------------------------------------
-
-  if (wait1start > 0) { //if the first wait time has started
-    if ((wait1time) < (millis() - wait1start)) { //if the first wait time is over
-      wait1start = 0; //set wait1start to 0
-      wait1time = 0; //set wait1start to 0
-      puffstart = millis(); //start the puff stage
-      if (real) { //if actually puffing
-        digitalWrite(relayPinPuff, HIGH); //turn puff on
-      }
-      else { //if not puffing
-        digitalWrite(relayPinFake, HIGH); //turn fake puff on
-      }
-    }
-  }
-
-  //-PUFFSTART--------------------------------------------------------------------------------------
-
-  if (puffstart > 0) { //if the puff stage has started
-    if ((pufftime) < (millis() - puffstart)) { //if the puff stage is over
-      puffstart = 0; //puffstart goes back to 0
-      if (real) {
-        digitalWrite(relayPinPuff, LOW); //turn puff off
-      }
-      else {
-        digitalWrite(relayPinFake, LOW); //turn fake puff off
-      }
-      wait2start = millis(); //start second wait time
-    }
-  }
-
-  //-WAIT2START--------------------------------------------------------------------------------------
-
-  if (wait2start > 0) { //if the second wait time has started
-    if ((wait2time) < (millis() - wait2start)) { //if the second wait time is over
-      wait2start = 0; //set wait2start back to 0
-      if (real) { //if actually pumping
-        npump = npump + 1; //adding one to the total number of times pumped
-        digitalWrite(relayPinPump, HIGH); //turn pump on
-        delay(pumptime); //length of a pump
-        digitalWrite(relayPinPump, LOW); //turn pump low
-      }
-      else { //if not actually pumping
-        digitalWrite(relayPinFakeTwo, HIGH); //turn fake pump on
-        delay(pumptime); //length of a pump
-        digitalWrite(relayPinFakeTwo, LOW); //turn fake pump off
-      }
-      wait3start = millis(); //starts third wait time
-    }
-  }
-
-  //-WAIT3START--------------------------------------------------------------------------------------
-  if (wait3start > 0) { //if the third wait time has started
-    if (((wait3time - 200) < (millis() - wait3start)) && (digitalRead(SENSORPIN))) { //indicator that the third wait time ended
-      wait3start = 0; //wait3start goes back to 0
-      File dataFileWeb = FileSystem.open(filenameWeb.c_str(), FILE_APPEND); //open the file
-      if (dataFileWeb) { //if the file is available, write to it
-        for (int x = 0; x < datacounter; x++) {
-          String tempString = String(printdata[x]);
-          dataFileWeb.println(tempString);
-          for (int y = 0; y < 23; y++) {
-            printdata[x][y] = (char)0;
-          }
-        }
-          String tempString2 = String(runtime);
-          runtime = float(millis()) / 1000; //calculate seconds
-          dataFileWeb.println(tempString2 + ",0,0,7,0");
-
-        dataFileWeb.close();
-        datacounter = 0;
-      }
-
-    }
-  }
-
-
-
-  //-DATA-STRING-WRITING--------------------------------------------------------------------------------------
-
-  if (!(blockedstart == 0) || !(puffstart == 0) || !(wait1start == 0) || !(wait2start == 0) || !(wait3start == 0)) { //if anything is triggered
-    // dataString += getTimeStamp(); //start the date
-    // dataString += ","; //separate with a comma
-    runtime = float(millis()) / 1000; //calculate seconds
-    dataString += runtime; //start the number of seconds
-    dataString += ","; //separate with a comma
-    if (!digitalRead(SENSORPIN)) { //if the sensor is blocked
-      dataString += "1"; //write a 1
-    }
-    else {
-      dataString += "0"; //otherwise write a 0
-    }
-    dataString += ","; //separate with a comma
-    if (digitalRead(LICKPIN) != 0) { //if licked
-      dataString += "2"; //write a 2
-    }
-    else {
-      dataString += "0"; //otherwise write a 0
-    }
-    dataString += ","; //separate with a comma
-
-
-    if (real) {
-      if (wait1start > 0) { //if wait1start has started
-        dataString += "3"; //write a 3
-      }
-      if (puffstart > 0) { //if puffstart has started
-        dataString += "4"; //write a 4
-      }
-      if (wait2start > 0) { //if wait2start has started
-        dataString += "5"; //write a 5
-      }
-      if (wait3start > 0) { //if wait3start has started
-        dataString += "7"; //write a 7
-      }
-    }
-    else {
-      dataString += "9"; //9 is fake run
-    }
-
-    dataString += ","; //separate with a comma
-    dataString += wait1time;
-
-
-
-    char charBuf[23];
-    dataString.toCharArray(charBuf, 23);
-    strcpy(printdata[datacounter], charBuf);
-    datacounter = datacounter + 1;
-    if (datacounter == 40) {
-      datadump();
-    }
-
-    delay(loopdelay);
-  }
-
-
-
 }
-
-//END LOOP
-
-void datadump() {
-
-  File dataFileWeb = FileSystem.open(filenameWeb.c_str(), FILE_APPEND); //open the file
-  if (dataFileWeb) { //if the file is available, write to it
-    for (int x = 0; x < datacounter; x++) {
-      String tempString = String(printdata[x]);
-      dataFileWeb.println(tempString);
-      for (int y = 0; y < 23; y++) {
-        printdata[x][y] = (char)0;
-      }
-    }
-    dataFileWeb.close();
-    datacounter = 0;
-  }
-}
-
 
