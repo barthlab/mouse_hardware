@@ -8,6 +8,9 @@
       system = "x86_64-linux";
     };
       mkShell {
+        # TODO broken for now, can't do `sudo arduino-cli`,
+        # but only after nix develop, not after
+        # `nix-shell -p arduino-cli gnumake screen`
         buildInputs = with pkgs; [
           arduino-cli
           gnumake
