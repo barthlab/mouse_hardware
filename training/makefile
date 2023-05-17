@@ -10,7 +10,7 @@ upload:
 	sudo arduino-cli compile -u -b $(FQBN) -p $(serial_port) ./
 
 compile:
-	sudo arduino-cli compile -b $(FQBN) -p $(serial_port) ./
+	sudo arduino-cli compile -b $(FQBN) ./
 
 list:
 	sudo arduino-cli board list
