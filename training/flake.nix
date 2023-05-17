@@ -10,11 +10,10 @@
       mkShell {
         # TODO broken for now, can't do `sudo arduino-cli`,
         # but only after nix develop, not after
-        # `nix-shell -p arduino-cli gnumake screen`
+        # `nix-shell -p arduino-cli gnumake`
         buildInputs = with pkgs; [
           arduino-cli
           gnumake
-          screen
         ];
 
         shellHook = ''

@@ -16,4 +16,4 @@ list:
 	sudo arduino-cli board list
 
 monitor:
-	alacritty -e sudo screen $(serial_port) $(baud_rate) # look into sudo arduino-cli monitor -p /dev/ttyACM0
+	sudo arduino-cli monitor -p $(serial_port) -c baudrate=$(baud_rate)
