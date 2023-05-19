@@ -9,6 +9,7 @@ import random
 import time
 
 import GPIO
+import picamera
 
 
 # for trouble shooting or testing, use initialDelay = 1000, trialDelay = 500, airTime=10, offTime = 250
@@ -27,28 +28,48 @@ num_trains_in_trial = 1
 # probability of receiving water
 water_prob = 50 # %
 
-dir = "../data"
+SAVE_DIR = "../data"
 
 # TODO change these numbers
 SOLENOID_PIN = 2
-TTL_PULSE_PIN = 7
 FAKE_SOLENOID_PIN = 3
+AIRPUFF_PULSE = 7
+VIDEO_PULSE = 8
 BUILTIN_LED_PIN = 1
+
+
 
 def nano_to_milli(nano):
     return(int(nano // 1e6))
+
+
+
+class PiCameraRecordingContextManager:
+    def __enter__(self, filename):
+        self._camera = picamera.PiCamera()
+        self._camera.start_recording(filename)
+        return self._camera
+
+    def __exit__(self, exc_type, exc_value, exc_tb):
+        self._camera.stop_recording(filename)
+        self._camera.close()
+        return None
+
+
 
 def setup():
     """Set up all the pins and set their initial values"""
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(SOLENOID_PIN, GPIO.OUT)
     GPIO.setup(FAKE_SOLENOID_PIN, GPIO.OUT)
-    GPIO.setup(TTL_PULSE_PIN, GPIO.OUT)
-    GPIO.setup(BUILTIN_LED_PIN, GPIO.OUT)
+    GPIO.setup(AIRPUFF_PULSE, GPIO.OUT)
+    GPIO.setup(VIDEO_PULSE, GPIO.OUT)
 
     GPIO.output(SOLENOID_PIN, GPIO.LOW)
-    GPIO.output(TTL_PULSE_PIN, GPIO.LOW)
-    GPIO.output(BUILTIN_LED_PIN, GPIO.LOW)
+    GPIO.output(AIRPUFF_PULSE, GPIO.LOW)
+    GPIO.output(VIDEO_PULSE, GPIO.LOW)
+
+
 
 def main():
     """Run test"""
@@ -56,31 +77,38 @@ def main():
 
     count = 0
 
-    with open(f"{dir}/{int(time.time())}.csv", "w") as csvfile:
+    filename = int(time.time()) # TODO save as day?
+
+    with open(f"{SAVE_DIR}/{filename}.csv", "w") as csvfile:
         csvwriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        for train_counter in range(num_trains_in_trial):
-            for puff_counter in range(num_puffs_in_train):
+        with PiCameraRecordingContextManager(f"{SAVE_DIR}/mouse_video_{filename}.h264") as camera:
+            GPIO.output(VIDEO_PULSE, GPIO.HIGH) # send a short pulse
+            GPIO.output(VIDEO_PULSE, GPIO.LOW)
+            for train_counter in range(num_trains_in_trial):
+                for puff_counter in range(num_puffs_in_train):
 
-                # randomly choose whether to use a real solenoid or a fake one
-                tmp_solenoid_pin = FAKE_SOLENOID_PIN
-                puff_string = "fake"
-                if (random.random() * 100 > water_prob):
-                    tmp_solenoid_pin = SOLENOID_PIN
-                    puff_string = "real"
+                    camera.wait_recording(0) # checks to see if still recording video
 
-                # air puff / fake air puff
-                GPIO.output(tmp_solenoid_pin, GPIO.HIGH)
-                solenoid_on = nano_to_milli(time.monotonic_ns())
-                GPIO.output(TTL_PULSE_PIN, GPIO.HIGH)
-                time.sleep(air_time)
-                GPIO.output(tmp_solenoid_pin, GPIO.LOW)
-                solenoid_off = nano_to_milli(time.monotonic_ns())
-                GPIO.output(TTL_PULSE_PIN, GPIO.LOW)
-                count += 1
+                    # randomly choose whether to use a real solenoid or a fake one
+                    puff_string = "fake"
+                    tmp_solenoid_pin = FAKE_SOLENOID_PIN
+                    if (random.random() * 100 > water_prob):
+                        puff_string = "real"
+                        tmp_solenoid_pin = SOLENOID_PIN
 
-                csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off])
+                    # air puff / fake air puff
+                    GPIO.output(tmp_solenoid_pin, GPIO.HIGH)
+                    solenoid_on = nano_to_milli(time.monotonic_ns())
+                    GPIO.output(AIRPUFF_PULSE, GPIO.HIGH)
+                    time.sleep(air_time)
+                    GPIO.output(tmp_solenoid_pin, GPIO.LOW)
+                    solenoid_off = nano_to_milli(time.monotonic_ns())
+                    GPIO.output(AIRPUFF_PULSE, GPIO.LOW)
+                    count += 1
 
-            time.sleep(train_delay)
+                    csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off])
+
+                time.sleep(train_delay)
 
 
 
