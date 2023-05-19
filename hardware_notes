@@ -2,7 +2,10 @@ computer hardware:
     raspberry pi zero w
 
 valves:
-    LHD Series 2-Way Control Solenoid Valve
+    we use LHD Series 2-Way Control Solenoid Valve
         12 V DC @ 65 milliAmps
     https://www.theleeco.com/product/lhl-series-2-way-control-solenoid-valve/#part-numbers-specifications
+
+standardize water:
     if we want to standardize the water pressure, we could use a regulator hooked up to pressurized water?
+        and then precisely time the solenoids
