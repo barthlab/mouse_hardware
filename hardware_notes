@@ -4,7 +4,8 @@ computer hardware:
 valves:
     we use LHD Series 2-Way Control Solenoid Valve
         12 V DC @ 65 milliAmps
-    https://www.theleeco.com/product/lhl-series-2-way-control-solenoid-valve/#part-numbers-specifications
+    https://www.theleeco.com/product/lhl-series-3-way-control-solenoid-valve/#part-numbers-specifications
+        so we can measure pressure for everything
 
 standardize water:
     if we want to standardize the water pressure, we could use a regulator hooked up to pressurized water?
