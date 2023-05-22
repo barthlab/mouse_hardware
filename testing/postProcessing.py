@@ -39,3 +39,6 @@ cv2.destroyAllWindows()
 # https://subscription.packtpub.com/book/application-development/9781785283932/4/ch04lvl1sec44/detecting-pupils
 # https://tech.paayi.com/pupil-detection-in-pyhton
 # https://stackoverflow.com/questions/31658729/detecting-exact-pupil-diameter-in-python-and-opencv
+# https://docs.opencv.org/3.1.0/dd/d49/tutorial_py_contour_features.html
+# https://medium.com/@stepanfilonov/tracking-your-eyes-with-python-3952e66194a6
+# https://docs.opencv.org/3.4/dd/d43/tutorial_py_video_display.html
