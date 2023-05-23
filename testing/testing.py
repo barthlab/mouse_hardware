@@ -8,7 +8,7 @@ import csv
 import random
 import time
 
-import GPIO
+import RPi.GPIO as GPIO
 import picamera
 
 
