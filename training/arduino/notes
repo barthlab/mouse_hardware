@@ -1,3 +1,2 @@
-unable to upload _ANYTHING_ that connects to bridge
-    code hangs on Bridge.begin()
-
+NEED TO CONNECT ARDUINO TO WALL OUTLET TOO BC COMPUTER DOES NOT PROVIDE ENOUGH POWER FOR DRAGINO TO BOOT
+    if you are running cli_over_serial.ino and it is in an infinite boot loop, this is because it doesn't have enough power to boot up, the solution is to also power the arduino using the wall outlet
