@@ -1,12 +1,55 @@
-computer hardware:
+new computer hardware:
     raspberry pi zero w
 
+
 valves:
-    we use LHD Series 2-Way Control Solenoid Valve
-        12 V DC @ 65 milliAmps
-    https://www.theleeco.com/product/lhl-series-3-way-control-solenoid-valve/#part-numbers-specifications
+    LHD Series 3-Way Control Solenoid Valve
+        5 V DC @ ~110 milliAmps
+    solder transistor to the valve so we can just use it with the hardware
+
+    TODO maybe have 2 different valves for gas and water?
+
+
+pressure measurement:
+    Adafruit MPRLS Ported Pressure Sensor Breakout - 0 to 25 PSI (3965)
         so we can measure pressure for everything
+
+
+lickport:
+    we need to use a larger capacitor or a different circuit to be able to sense at the frequency we want (6-10 Hz) bc we can currently see (0-7 Hz)
+        https://learn.adafruit.com/adafruit-capacitive-touch-sensor-breakouts/downloads
+
+    TODO look into alternatives that don't require us to solder a new capacitor on
+
+
+power:
+    5 V DC wall converter
+    12 V DC wall converter
+
 
 standardize water:
     if we want to standardize the water pressure, we could use a regulator hooked up to pressurized water?
         and then precisely time the solenoids
+        or we could release a very consistent amount of water
+
+
+
+old computer hardware:
+    arduino lenoardo
+    yun shield
+    ??? - the power one
+
+
+valves:
+    LHD Series 3-Way Control Solenoid Valve
+        12 V DC @ 65 milliAmps
+
+
+lickport:
+    Adafruit AT42QT1010
+
+
+power:
+    12 V DC wall converter
+
+
