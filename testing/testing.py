@@ -33,13 +33,12 @@ water_prob = 50 # %
 
 SAVE_DIR = "../data"
 
-# TODO change these numbers
-LICKPORT_PIN = -1
-WATER_SOLENOID_PIN = -1
-AIRPUFF_SOLENOID_PIN = -2
-FAKE_SOLENOID_PIN = -3
-AIRPUFF_TTL_PULSE = -7
-VIDEO_TTL_PULSE = -8
+LICKPORT_PIN = 21 # TODO add to code, use interrupts to count the licks on the lickport sensor
+WATER_SOLENOID_PIN = 8
+AIRPUFF_SOLENOID_PIN = 10
+FAKE_SOLENOID_PIN = 12
+AIRPUFF_TTL_PULSE = 11
+VIDEO_TTL_PULSE = 36
 
 
 
@@ -61,16 +60,6 @@ class PiCameraRecordingContextManager:
 
 
 
-def sleep_and_do(time_to_sleep, func):
-    # takes in an amount of time to sleep in seconds and a function
-    # does the function until the amount of time specified has concluded
-    # NOTE: if the function takes a really long time to do, it will affect the timing
-    start_time = time.time()
-    while (start_time + time_to_sleep * 1000 < time.time()):
-        func()
-
-
-
 def setup():
     """Set up all the pins and set their initial values"""
     GPIO.setmode(GPIO.BOARD)
@@ -83,10 +72,11 @@ def setup():
 
     GPIO.output(WATER_SOLENOID_PIN, GPIO.LOW)
     GPIO.output(AIRPUFF_SOLENOID_PIN, GPIO.LOW)
+    GPIO.output(FAKE_SOLENOID_PIN, GPIO.LOW)
     GPIO.output(AIRPUFF_TTL_PULSE, GPIO.LOW)
     GPIO.output(VIDEO_TTL_PULSE, GPIO.LOW)
 
-
+    GPIO.add_event_detect(BUTTON_GPIO, GPIO.RISING, callback=button_pressed_callback)
 
 def main():
     """Run test"""
@@ -94,7 +84,7 @@ def main():
 
     count = 0
 
-    filename = int(time.time()) # TODO save as day?
+    filename = input("what do you want to save the CSV file as?")
 
     with open(f"{SAVE_DIR}/{filename}.csv", "w") as csvfile:
 
@@ -121,23 +111,23 @@ def main():
                     GPIO.output(tmp_solenoid_pin, GPIO.HIGH)
                     solenoid_on = nano_to_milli(time.monotonic_ns())
                     GPIO.output(AIRPUFF_TTL_PULSE, GPIO.HIGH)
-                    sleep_and_do(air_time, lambda x: csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off, GPIO.input(LICKPORT_PIN)]))
+                    time.sleep(air_time)
                     GPIO.output(tmp_solenoid_pin, GPIO.LOW)
                     solenoid_off = nano_to_milli(time.monotonic_ns())
                     GPIO.output(AIRPUFF_TTL_PULSE, GPIO.LOW)
 
-                    sleep_and_do(air_puff_to_water_release_time, lambda x: csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off, GPIO.input(LICKPORT_PIN)]))
+                    time.sleep(air_puff_to_water_release_time)
 
                     # water release / fake water release
                     GPIO.output(tmp_water_pin, GPIO.HIGH)
                     water_on = nano_to_milli(time.monotonic_ns())
                     GPIO.output(WATER_TTL_PULSE, GPIO.HIGH)
-                    sleep_and_do(water_time, lambda x: csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off, GPIO.input(LICKPORT_PIN)]))
+                    time.sleep(water_time)
                     GPIO.output(tmp_water_pin, GPIO.LOW)
                     water_off = nano_to_milli(time.monotonic_ns())
                     GPIO.output(WATER_TTL_PULSE, GPIO.LOW)
 
-                    csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off, GPIO.input(LICKPORT_PIN)])
+                    csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
 
                     count += 1
 
