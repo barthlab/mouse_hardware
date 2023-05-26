@@ -48,13 +48,16 @@ def nano_to_milli(nano):
 
 
 class PiCameraRecordingContextManager:
-    def __enter__(self, filename):
+    def __init__(self, filename):
+        self._filename = filename
+
+    def __enter__(self):
         self._camera = picamera.PiCamera()
-        self._camera.start_recording(filename)
+        self._camera.start_recording(self._filename)
         return self._camera
 
     def __exit__(self, exc_type, exc_value, exc_tb):
-        self._camera.stop_recording(filename)
+        self._camera.stop_recording()
         self._camera.close()
         return None
 
@@ -76,7 +79,6 @@ def setup():
     GPIO.output(AIRPUFF_TTL_PULSE, GPIO.LOW)
     GPIO.output(VIDEO_TTL_PULSE, GPIO.LOW)
 
-    GPIO.add_event_detect(BUTTON_GPIO, GPIO.RISING, callback=button_pressed_callback)
 
 def main():
     """Run test"""
@@ -84,7 +86,7 @@ def main():
 
     count = 0
 
-    filename = input("what do you want to save the CSV file as?")
+    filename = input("what do you want to save the CSV file as?\n")
 
     with open(f"{SAVE_DIR}/{filename}.csv", "w") as csvfile:
 
@@ -121,11 +123,9 @@ def main():
                     # water release / fake water release
                     GPIO.output(tmp_water_pin, GPIO.HIGH)
                     water_on = nano_to_milli(time.monotonic_ns())
-                    GPIO.output(WATER_TTL_PULSE, GPIO.HIGH)
                     time.sleep(water_time)
                     GPIO.output(tmp_water_pin, GPIO.LOW)
                     water_off = nano_to_milli(time.monotonic_ns())
-                    GPIO.output(WATER_TTL_PULSE, GPIO.LOW)
 
                     csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
 
