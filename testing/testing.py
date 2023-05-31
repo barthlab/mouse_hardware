@@ -73,20 +73,20 @@ def setup():
     GPIO.setup(AIRPUFF_TTL_PULSE, GPIO.OUT)
     GPIO.setup(VIDEO_TTL_PULSE, GPIO.OUT)
 
-    GPIO.output(WATER_SOLENOID_PIN, GPIO.LOW)
-    GPIO.output(AIRPUFF_SOLENOID_PIN, GPIO.LOW)
-    GPIO.output(FAKE_SOLENOID_PIN, GPIO.LOW)
+    GPIO.output(WATER_SOLENOID_PIN, GPIO.HIGH)
+    GPIO.output(AIRPUFF_SOLENOID_PIN, GPIO.HIGH)
+    GPIO.output(FAKE_SOLENOID_PIN, GPIO.HIGH)
     GPIO.output(AIRPUFF_TTL_PULSE, GPIO.LOW)
     GPIO.output(VIDEO_TTL_PULSE, GPIO.LOW)
 
 
 def main():
     """Run test"""
-    time.sleep(initial_delay)
-
     count = 0
 
     filename = input("what do you want to save the CSV file as?\n")
+
+    time.sleep(initial_delay)
 
     with open(f"{SAVE_DIR}/{filename}.csv", "w") as csvfile:
 
@@ -109,22 +109,24 @@ def main():
                         tmp_water_pin = WATER_SOLENOID_PIN
                         tmp_solenoid_pin = AIRPUFF_SOLENOID_PIN
 
+                    print(puff_string)
+
                     # air puff / fake air puff
-                    GPIO.output(tmp_solenoid_pin, GPIO.HIGH)
+                    GPIO.output(tmp_solenoid_pin, GPIO.LOW)
                     solenoid_on = nano_to_milli(time.monotonic_ns())
                     GPIO.output(AIRPUFF_TTL_PULSE, GPIO.HIGH)
                     time.sleep(air_time)
-                    GPIO.output(tmp_solenoid_pin, GPIO.LOW)
+                    GPIO.output(tmp_solenoid_pin, GPIO.HIGH)
                     solenoid_off = nano_to_milli(time.monotonic_ns())
                     GPIO.output(AIRPUFF_TTL_PULSE, GPIO.LOW)
 
                     time.sleep(air_puff_to_water_release_time)
 
                     # water release / fake water release
-                    GPIO.output(tmp_water_pin, GPIO.HIGH)
+                    GPIO.output(tmp_water_pin, GPIO.LOW)
                     water_on = nano_to_milli(time.monotonic_ns())
                     time.sleep(water_time)
-                    GPIO.output(tmp_water_pin, GPIO.LOW)
+                    GPIO.output(tmp_water_pin, GPIO.HIGH)
                     water_off = nano_to_milli(time.monotonic_ns())
 
                     csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
