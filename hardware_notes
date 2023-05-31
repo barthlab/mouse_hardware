@@ -19,6 +19,11 @@ lickport:
     we need to use a larger capacitor or a different circuit to be able to sense at the frequency we want (6-10 Hz) bc we can currently see (0-7 Hz)
         https://learn.adafruit.com/adafruit-capacitive-touch-sensor-breakouts/downloads
         AT42QT1010 sends out a heartbeat pulse every once in a while
+            https://cdn-learn.adafruit.com/assets/assets/000/009/807/original/proximity_AT42QT1010.png?1396897662
+                C1:
+                    22 nF
+                    2 - 50 nF
+                    decrease it to increase response time
 
 
 power:
