@@ -18,8 +18,7 @@ pressure measurement:
 lickport:
     we need to use a larger capacitor or a different circuit to be able to sense at the frequency we want (6-10 Hz) bc we can currently see (0-7 Hz)
         https://learn.adafruit.com/adafruit-capacitive-touch-sensor-breakouts/downloads
-
-    TODO look into alternatives that don't require us to solder a new capacitor on
+        AT42QT1010 sends out a heartbeat pulse every once in a while
 
 
 power:
