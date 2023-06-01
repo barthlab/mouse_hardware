@@ -84,7 +84,7 @@ def main():
     """Run test"""
     count = 0
 
-    filename = input("what do you want to save the CSV file as?\n")
+    filename = input("what do you want to save the experiment as?\n")
 
     time.sleep(initial_delay)
 
@@ -129,11 +129,11 @@ def main():
                     GPIO.output(tmp_water_pin, GPIO.HIGH)
                     water_off = nano_to_milli(time.monotonic_ns())
 
+                    time.sleep(train_delay)
+
                     csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
 
                     count += 1
-
-                time.sleep(train_delay)
 
 
 
