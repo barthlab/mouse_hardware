@@ -4,6 +4,7 @@
 Air puff stimulator for raspberry pi
 """
 
+
 import csv
 import random
 import time
@@ -12,10 +13,9 @@ import RPi.GPIO as GPIO
 import picamera
 
 
+
 # delay between running script and first trial start
 initial_delay = 100 # seconds
-# delay between trains
-train_delay = 0 # seconds
 # air puff duration
 air_time = 0.5 # seconds
 # water drip duration
@@ -80,6 +80,7 @@ def setup():
     GPIO.output(VIDEO_TTL_PULSE, GPIO.LOW)
 
 
+
 def main():
     """Run test"""
     count = 0
@@ -129,7 +130,7 @@ def main():
                     GPIO.output(tmp_water_pin, GPIO.HIGH)
                     water_off = nano_to_milli(time.monotonic_ns())
 
-                    time.sleep(train_delay)
+                    time.sleep(inter_puff_delay)
 
                     csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
 
