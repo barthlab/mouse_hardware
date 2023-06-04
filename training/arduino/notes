@@ -2,7 +2,7 @@ NEED TO CONNECT ARDUINO TO WALL OUTLET TOO BC COMPUTER DOES NOT PROVIDE ENOUGH P
     if you are running cli_over_serial.ino and it is in an infinite boot loop, this is because it doesn't have enough power to boot up, the solution is to also power the arduino using the wall outlet
     AT42QT1010 sends out a heartbeat pulse, so we need to pulldown the pin that reads from it
 
-So apparently we have a linino board with us...
-    to upgrade non linino arduino: https://docs.arduino.cc/tutorials/yun-rev2/yun-sys-upgrade
-    to upgrade linino arduino: https://www.dragino.com/downloads/index.php?dir=motherboards/ms14/Firmware/Yun/
+So apparently we have a linino board among the arduino boards
+    to upgrade arduino: https://docs.arduino.cc/tutorials/yun-rev2/yun-sys-upgrade
+    to upgrade linino: https://www.dragino.com/downloads/index.php?dir=motherboards/ms14/Firmware/Yun/
 
