@@ -26,7 +26,8 @@ def B(pin):
 def setup():
     """Set up all the pins and set their initial values"""
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(LICKPORT_PIN, GPIO.IN)
+    GPIO.setup(ENCODER_A_PIN, GPIO.IN)
+    GPIO.setup(ENCODER_B_PIN, GPIO.IN)
 
     GPIO.add_event_detect(ENCODER_A_PIN, GPIO.RISING, callback=A)
     GPIO.add_event_detect(ENCODER_B_PIN, GPIO.RISING, callback=B)
