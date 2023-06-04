@@ -14,7 +14,6 @@ LICKPORT_PIN = 21
 
 def rising():
     print("touch detected")
-    GPIO.output(FAKE_SOLENOID_PIN, GPIO.LOW)
 
 
 
@@ -23,7 +22,7 @@ def setup():
     GPIO.setmode(GPIO.BOARD)
     GPIO.setup(LICKPORT_PIN, GPIO.IN)
 
-    GPIO.add_event_detect(LICKPORT_PIN, GPIO.CHANGING, callback=rising)
+    GPIO.add_event_detect(LICKPORT_PIN, GPIO.RISING, callback=rising)
 
 
 
