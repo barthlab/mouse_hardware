@@ -37,6 +37,8 @@ LICKPORT_PIN = 21 # TODO add to code, use interrupts to count the licks on the l
 WATER_SOLENOID_PIN = 8
 AIRPUFF_SOLENOID_PIN = 10
 FAKE_SOLENOID_PIN = 12
+ENCODER_A_PIN = 24
+ENCODER_B_PIN = 22
 AIRPUFF_TTL_PULSE = 11
 VIDEO_TTL_PULSE = 36
 
@@ -63,6 +65,16 @@ class PiCameraRecordingContextManager:
 
 
 
+def A(pin):
+    running_data.append(("A", nano_to_milli(time.monotonic_ns())))
+
+
+
+def B(pin):
+    running_data.append(("B", nano_to_milli(time.monotonic_ns())))
+
+
+
 def setup():
     """Set up all the pins and set their initial values"""
     GPIO.setmode(GPIO.BOARD)
@@ -78,6 +90,9 @@ def setup():
     GPIO.output(FAKE_SOLENOID_PIN, GPIO.HIGH)
     GPIO.output(AIRPUFF_TTL_PULSE, GPIO.LOW)
     GPIO.output(VIDEO_TTL_PULSE, GPIO.LOW)
+
+    GPIO.add_event_detect(ENCODER_A_PIN, GPIO.RISING, callback=A)
+    GPIO.add_event_detect(ENCODER_B_PIN, GPIO.RISING, callback=B)
 
 
 
@@ -132,13 +147,15 @@ def main():
 
                     time.sleep(inter_puff_delay)
 
-                    csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
+                    tmp, running_data = running_data, []
+                    csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off, runnign_data])
 
                     count += 1
 
 
 
 if "__main__" == __name__:
+    running_data = []
     setup()
     main()
     GPIO.cleanup()
