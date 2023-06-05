@@ -38,7 +38,7 @@ WATER_SOLENOID_PIN = 8
 AIRPUFF_SOLENOID_PIN = 10
 FAKE_SOLENOID_PIN = 12
 ENCODER_A_PIN = 24
-ENCODER_B_PIN = 22
+ENCODER_B_PIN = 22 # To be able to tell direction
 AIRPUFF_TTL_PULSE = 11
 VIDEO_TTL_PULSE = 36
 
@@ -66,12 +66,8 @@ class PiCameraRecordingContextManager:
 
 
 def A(pin):
-    running_data.append(("A", nano_to_milli(time.monotonic_ns())))
-
-
-
-def B(pin):
-    running_data.append(("B", nano_to_milli(time.monotonic_ns())))
+    global running_distance_times
+    running_distance_times.append(time.monotonic_ns() / 1e9) # seconds
 
 
 
@@ -81,6 +77,8 @@ def setup():
     GPIO.setup(LICKPORT_PIN, GPIO.IN)
     GPIO.setup(WATER_SOLENOID_PIN, GPIO.OUT)
     GPIO.setup(AIRPUFF_SOLENOID_PIN, GPIO.OUT)
+    GPIO.setup(ENCODER_A_PIN, GPIO.IN)
+    GPIO.setup(ENCODER_B_PIN, GPIO.IN)
     GPIO.setup(FAKE_SOLENOID_PIN, GPIO.OUT)
     GPIO.setup(AIRPUFF_TTL_PULSE, GPIO.OUT)
     GPIO.setup(VIDEO_TTL_PULSE, GPIO.OUT)
@@ -92,12 +90,14 @@ def setup():
     GPIO.output(VIDEO_TTL_PULSE, GPIO.LOW)
 
     GPIO.add_event_detect(ENCODER_A_PIN, GPIO.RISING, callback=A)
-    GPIO.add_event_detect(ENCODER_B_PIN, GPIO.RISING, callback=B)
 
 
 
 def main():
     """Run test"""
+
+    global running_distance_times
+
     count = 0
 
     filename = input("what do you want to save the experiment as?\n")
@@ -147,15 +147,23 @@ def main():
 
                     time.sleep(inter_puff_delay)
 
-                    tmp, running_data = running_data, []
-                    csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off, runnign_data])
+                    # save run speed data
+                    times, running_distance_times = running_distance_times, []
+                    # TODO just collect points and times and then convert those into speeds
+                    wheel_perimeter = 46.5 / 100 # meters
+                    encoder_divisions = 1250 # divisions
+                    num_datapoints = len(times)
+                    time_diffs = [times[1 + i] - times[i] for i in range(num_datapoints - 1)]
+                    speeds = [wheel_perimeter / encoder_divisions / time_diffs[i] for i in range(num_datapoints - 1)]
+
+                    csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off, list(zip(times, speeds))])
 
                     count += 1
 
 
 
 if "__main__" == __name__:
-    running_data = []
+    running_distance_times = [] # time that the marker was hit
     setup()
     main()
     GPIO.cleanup()
