@@ -104,8 +104,8 @@ def main():
 
     time.sleep(initial_delay)
 
-    with open(f"{SAVE_DIR}/{filename}.csv", "w") as puff_data_file:
-        with open(f"{SAVE_DIR}/{filename}_run_data.csv", "w") as run_data_file:
+    with open(f"{SAVE_DIR}/puff_data_{filename}.csv", "w") as puff_data_file:
+        with open(f"{SAVE_DIR}/run_data_{filename}.csv", "w") as run_data_file:
 
             puff_writer = csv.writer(puff_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
             run_writer = csv.writer(run_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
