@@ -158,7 +158,8 @@ def main():
                         time_diffs = [times[1 + i] - times[i] for i in range(num_datapoints - 1)]
                         speeds = [wheel_perimeter / encoder_divisions / time_diffs[i] for i in range(num_datapoints - 1)]
 
-                        run_writer.writerow(list(zip(times, speeds)))
+                        for data in list(zip(times, speeds)):
+                            run_writer.writerow(data)
                         puff_writer.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
 
                         count += 1
