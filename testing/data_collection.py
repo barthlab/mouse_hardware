@@ -104,61 +104,64 @@ def main():
 
     time.sleep(initial_delay)
 
-    with open(f"{SAVE_DIR}/{filename}.csv", "w") as csvfile:
+    with open(f"{SAVE_DIR}/{filename}.csv", "w") as puff_data_file:
+        with open(f"{SAVE_DIR}/{filename}_run_data.csv", "w") as run_data_file:
 
-        csvwriter = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            puff_writer = csv.writer(puff_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+            run_writer = csv.writer(run_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
-        with PiCameraRecordingContextManager(f"{SAVE_DIR}/mouse_video_{filename}.h264") as camera:
-            GPIO.output(VIDEO_TTL_PULSE, GPIO.HIGH) # send a short pulse
-            GPIO.output(VIDEO_TTL_PULSE, GPIO.LOW)
-            for train_counter in range(num_trains_in_trial):
-                for puff_counter in range(num_puffs_in_train):
+            with PiCameraRecordingContextManager(f"{SAVE_DIR}/mouse_video_{filename}.h264") as camera:
+                GPIO.output(VIDEO_TTL_PULSE, GPIO.HIGH) # send a short pulse
+                GPIO.output(VIDEO_TTL_PULSE, GPIO.LOW)
+                for train_counter in range(num_trains_in_trial):
+                    for puff_counter in range(num_puffs_in_train):
 
-                    camera.wait_recording(0) # checks to see if still recording video
+                        camera.wait_recording(0) # checks to see if still recording video
 
-                    # randomly choose whether to use a real solenoid or a fake one
-                    puff_string = "fake"
-                    tmp_solenoid_pin = FAKE_SOLENOID_PIN
-                    tmp_water_pin = FAKE_SOLENOID_PIN
-                    if (random.random() * 100 > water_prob):
-                        puff_string = "real"
-                        tmp_water_pin = WATER_SOLENOID_PIN
-                        tmp_solenoid_pin = AIRPUFF_SOLENOID_PIN
+                        # randomly choose whether to use a real solenoid or a fake one
+                        puff_string = "fake"
+                        tmp_solenoid_pin = FAKE_SOLENOID_PIN
+                        tmp_water_pin = FAKE_SOLENOID_PIN
+                        if (random.random() * 100 > water_prob):
+                            puff_string = "real"
+                            tmp_water_pin = WATER_SOLENOID_PIN
+                            tmp_solenoid_pin = AIRPUFF_SOLENOID_PIN
 
-                    print(puff_string)
+                        print(puff_string)
 
-                    # air puff / fake air puff
-                    GPIO.output(tmp_solenoid_pin, GPIO.LOW)
-                    solenoid_on = nano_to_milli(time.monotonic_ns())
-                    GPIO.output(AIRPUFF_TTL_PULSE, GPIO.HIGH)
-                    time.sleep(air_time)
-                    GPIO.output(tmp_solenoid_pin, GPIO.HIGH)
-                    solenoid_off = nano_to_milli(time.monotonic_ns())
-                    GPIO.output(AIRPUFF_TTL_PULSE, GPIO.LOW)
+                        # air puff / fake air puff
+                        GPIO.output(tmp_solenoid_pin, GPIO.LOW)
+                        solenoid_on = nano_to_milli(time.monotonic_ns())
+                        GPIO.output(AIRPUFF_TTL_PULSE, GPIO.HIGH)
+                        time.sleep(air_time)
+                        GPIO.output(tmp_solenoid_pin, GPIO.HIGH)
+                        solenoid_off = nano_to_milli(time.monotonic_ns())
+                        GPIO.output(AIRPUFF_TTL_PULSE, GPIO.LOW)
 
-                    time.sleep(air_puff_to_water_release_time)
+                        time.sleep(air_puff_to_water_release_time)
 
-                    # water release / fake water release
-                    GPIO.output(tmp_water_pin, GPIO.LOW)
-                    water_on = nano_to_milli(time.monotonic_ns())
-                    time.sleep(water_time)
-                    GPIO.output(tmp_water_pin, GPIO.HIGH)
-                    water_off = nano_to_milli(time.monotonic_ns())
+                        # water release / fake water release
+                        GPIO.output(tmp_water_pin, GPIO.LOW)
+                        water_on = nano_to_milli(time.monotonic_ns())
+                        time.sleep(water_time)
+                        GPIO.output(tmp_water_pin, GPIO.HIGH)
+                        water_off = nano_to_milli(time.monotonic_ns())
 
-                    time.sleep(inter_puff_delay)
+                        time.sleep(inter_puff_delay)
 
-                    # save run speed data
-                    times, running_distance_times = running_distance_times, []
-                    # TODO just collect points and times and then convert those into speeds
-                    wheel_perimeter = 46.5 / 100 # meters
-                    encoder_divisions = 1250 # divisions
-                    num_datapoints = len(times)
-                    time_diffs = [times[1 + i] - times[i] for i in range(num_datapoints - 1)]
-                    speeds = [wheel_perimeter / encoder_divisions / time_diffs[i] for i in range(num_datapoints - 1)]
+                        # save run speed data
+                        times, running_distance_times = running_distance_times, []
+                        # TODO just collect points and times and then convert those into speeds
+                        wheel_perimeter = 46.5 / 100 # meters
+                        encoder_divisions = 1250 # divisions
+                        num_datapoints = len(times)
+                        time_diffs = [times[1 + i] - times[i] for i in range(num_datapoints - 1)]
+                        speeds = [wheel_perimeter / encoder_divisions / time_diffs[i] for i in range(num_datapoints - 1)]
 
-                    csvwriter.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off, list(zip(times, speeds))])
+                        run_writer.writerow(list(zip(times, speeds)))
+                        puff_writer.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
 
-                    count += 1
+                        count += 1
 
 
 
