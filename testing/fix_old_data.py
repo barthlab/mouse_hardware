@@ -13,8 +13,8 @@ import csv
 
 original_file_name = input("what is the name of the csv file?\n")
 
-puff_file_name = "puff_data_" + csv_file_name
-run_file_name = "run_data_" + csv_file_name
+puff_file_name = "puff_data_" + original_file_name
+run_file_name = "run_data_" + original_file_name
 
 with open(original_file_name, "r") as original_data_file:
     with open(puff_file_name, "w+") as puff_data_file:
