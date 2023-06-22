@@ -16,6 +16,8 @@ import picamera
 
 # delay between running script and first trial start
 initial_delay = 100 # seconds
+# delay between end of final trial and program termination
+final_delay = 100 # seconds
 # air puff duration
 air_time = 0.5 # seconds
 # water drip duration
@@ -47,6 +49,14 @@ VIDEO_TTL_PULSE = 36
 def nano_to_milli(nano):
     return(int(nano // 1e6))
 
+
+def extract_speeds_from_distance_interrupts(times):
+    wheel_perimeter = 46.5 / 100 # meters
+    encoder_divisions = 1250 # divisions
+    num_datapoints = len(times)
+    time_diffs = [times[1 + i] - times[i] for i in range(num_datapoints - 1)]
+    speeds = [wheel_perimeter / encoder_divisions / time_diffs[i] for i in range(num_datapoints - 1)]
+    return speeds
 
 
 class PiCameraRecordingContextManager:
@@ -151,18 +161,21 @@ def main():
 
                         # save run speed data
                         times, running_distance_times = running_distance_times, []
-                        # TODO just collect points and times and then convert those into speeds
-                        wheel_perimeter = 46.5 / 100 # meters
-                        encoder_divisions = 1250 # divisions
-                        num_datapoints = len(times)
-                        time_diffs = [times[1 + i] - times[i] for i in range(num_datapoints - 1)]
-                        speeds = [wheel_perimeter / encoder_divisions / time_diffs[i] for i in range(num_datapoints - 1)]
+                        speeds = extract_speed_from_wheel_interrupts(times)
 
                         for data in list(zip(times, speeds)):
                             run_writer.writerow(data)
                         puff_writer.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
 
                         count += 1
+
+        time.sleep(final_delay)
+
+        times, running_distance_times = running_distance_times, []
+        speeds = extract_speed_from_wheel_interrupts(times)
+
+        for data in list(zip(times, speeds)):
+            run_writer.writerow(data)
 
 
 
