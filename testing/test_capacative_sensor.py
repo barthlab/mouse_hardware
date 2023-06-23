@@ -12,7 +12,7 @@ LICKPORT_PIN = 21
 
 
 
-def rising():
+def rising(pin):
     print("touch detected")
 
 
