@@ -169,13 +169,13 @@ def main():
 
                         count += 1
 
-        time.sleep(final_delay)
+            time.sleep(final_delay)
 
-        times, running_distance_times = running_distance_times, []
-        speeds = extract_speeds_from_wheel_interrupts(times)
+            times, running_distance_times = running_distance_times, []
+            speeds = extract_speeds_from_wheel_interrupts(times)
 
-        for data in list(zip(times, speeds)):
-            run_writer.writerow(data)
+            for data in list(zip(times, speeds)):
+                run_writer.writerow(data)
 
 
 
