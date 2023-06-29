@@ -112,8 +112,6 @@ def main():
 
     filename = input("what do you want to save the experiment as?\n")
 
-    time.sleep(initial_delay)
-
     with open(f"{SAVE_DIR}/puff_data_{filename}.csv", "w") as puff_data_file:
         with open(f"{SAVE_DIR}/run_data_{filename}.csv", "w") as run_data_file:
 
@@ -123,6 +121,9 @@ def main():
             with PiCameraRecordingContextManager(f"{SAVE_DIR}/mouse_video_{filename}.h264") as camera:
                 GPIO.output(VIDEO_TTL_PULSE, GPIO.HIGH) # send a short pulse
                 GPIO.output(VIDEO_TTL_PULSE, GPIO.LOW)
+
+                time.sleep(initial_delay)
+
                 for train_counter in range(num_trains_in_trial):
                     for puff_counter in range(num_puffs_in_train):
 
