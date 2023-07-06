@@ -1,44 +1,98 @@
-# TODO this
-
-import math
+# TODO convert wheel ticks to speed? here rather than in the code?
 
 import cv2
 import numpy as np
 
-img = cv2.imread('ghjk.jpg')
-scaling_factor = 1.5
 
-img = cv2.resize(img, None, fx=scaling_factor, fy=scaling_factor, interpolation=cv2.INTER_AREA)
-gray = cv2.cvtColor(~img, cv2.COLOR_BGR2GRAY)
 
-ret, thresh_gray = cv2.threshold(gray, 230, 255, cv2.THRESH_BINARY)
-contours, hierarchy = cv2.findContours(thresh_gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_NONE)
+# Constants for circle detection
+MIN_RADIUS = 10
+MAX_RADIUS = 100
+CIRCLE_COLOR = (0, 0, 255)  # Red
 
-#cv2.imshow('contours', thresh_gray)
 
-for contour in contours:
-    area = cv2.contourArea(contour)
-    rect = cv2.boundingRect(contour)
-    x, y, width, height = rect
-    print(rect)
-    centerx, centery = (x + width/2, y + height/2)
-    radius = 0.25 * (width + height)
 
-    fill_condition = (abs(1 - (area / (math.pi * math.pow(radius, 2.0)))) <= 0.2)
+# Global variables for selected rectangle
+selected_rectangle = None
+rectangle_selected = False
 
-    if fill_condition:
-        cv2.circle(img, (int(x + radius), int(y + radius)), int(1.3*radius), (0,180,0), -1)
 
-cv2.imshow('Pupil Detector', img)
 
-c = cv2.waitKey()
+# Mouse callback function to select rectangle
+def select_rectangle(event, x, y, flags, param):
+    global selected_rectangle, rectangle_selected
+
+    if event == cv2.EVENT_LBUTTONDOWN:
+        selected_rectangle = (x, y)
+    elif event == cv2.EVENT_LBUTTONUP:
+        selected_rectangle = (selected_rectangle[0], x, selected_rectangle[1], y)
+        rectangle_selected = True
+
+
+
+# Function to detect circle in the selected area
+def detect_circle(frame, rect):
+    x1, y1, x2, y2 = rect
+    roi = frame[y1:y2, x1:x2]  # Extract the region of interest
+
+    gray = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+    _, thresh = cv2.threshold(gray, 30, 255, cv2.THRESH_BINARY)
+    contours, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    for contour in contours:
+        area = cv2.contourArea(contour)
+        if area > MIN_RADIUS ** 2 * np.pi and area < MAX_RADIUS ** 2 * np.pi:
+            (x, y), radius = cv2.minEnclosingCircle(contour)
+            center = (int(x), int(y))
+            radius = int(radius)
+            cv2.circle(roi, center, radius, CIRCLE_COLOR, 2)
+            return radius
+
+    return None
+
+
+
+# Load video file
+video_path = 'path/to/your/video.mp4'
+cap = cv2.VideoCapture(video_path)
+
+
+
+# Set codec configuration for H.264
+cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*'avc1'))
+
+
+
+# Create window and set mouse callback
+cv2.namedWindow('Video')
+cv2.setMouseCallback('Video', select_rectangle)
+
+
+
+# Loop through video frames
+while True:
+    ret, frame = cap.read()
+
+    if not ret:
+        break
+
+    # Draw selected rectangle if available
+    if selected_rectangle is not None:
+        x1, y1, x2, y2 = selected_rectangle
+        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+        # Detect circle in selected area
+        if rectangle_selected:
+            radius = detect_circle(frame, selected_rectangle)
+            if radius is not None:
+                print("Radius:", radius)
+
+    cv2.imshow('Video', frame)
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+
+
+
+# Release resources
+cap.release()
 cv2.destroyAllWindows()
-
-
-# TODO extract pupils using opencv
-# https://subscription.packtpub.com/book/application-development/9781785283932/4/ch04lvl1sec44/detecting-pupils
-# https://tech.paayi.com/pupil-detection-in-pyhton
-# https://stackoverflow.com/questions/31658729/detecting-exact-pupil-diameter-in-python-and-opencv
-# https://docs.opencv.org/3.1.0/dd/d49/tutorial_py_contour_features.html
-# https://medium.com/@stepanfilonov/tracking-your-eyes-with-python-3952e66194a6
-# https://docs.opencv.org/3.4/dd/d43/tutorial_py_video_display.html
