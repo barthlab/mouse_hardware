@@ -1,4 +1,5 @@
 Connection Diagram:
+    water<----(relay)---------------
     air puff<-(relay)---------------
     walking---(encoder)------------>Raspberry Pi ---(ssh)-------------->computer
     licks-----(capacitive sensor)-->  ||                                  ^^
@@ -8,7 +9,7 @@ Connection Diagram:
                             ttl pulse || ttl pulse                        ||
                             for video || high when                        ||
                             recording || air puff                         ||
-                                      ||                                  ||
+                            (DI 0)    || (DI 1)                           ||
                                       ||                                  ||
                                       ||                                  ||
                                       ||                                  ||
@@ -23,23 +24,17 @@ Connection Diagram:
                                     Mait Tai HP
 
 
+
 Raspberry Pi Information:
     ssh user@barthlabrpi.wifi.local.cmu.edu
     password = check Alex's notebook, page 3
     MAC = b8:27:eb:79:2b:09
     raspberry pi model 3b v1.2
-    view ip address through getonline.cmu.edu
-    reinstall rpi:
+    view ip address through getonline.cmu.edu (you should be automatically added to the group if you are on the payroll)
+    reinstall raspberry pi:
         https://www.raspberrypi.com/software/operating-systems/
         commands to set up the pi:
             sudo raspi-config
                 enable camera
                 enable ssh
-
-
-Capacitor switch used:
-    https://www.adafruit.com/product/1374
-
-What we want to do:
-     arduino sends a ttl pusle to microscope when it starts recording
-     arduino wiring
+            # need to make raspberry pi automatically connect to CMU-DEVICE
