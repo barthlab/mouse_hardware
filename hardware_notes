@@ -3,23 +3,31 @@ cages are registered at:
 
 
 new computer hardware:
-    raspberry pi zero w
+    raspberry pi zero (does not need to be w)
+    add ethernet
+        https://www.amazon.com/USB-HUB-HAT-Board-Compatible/dp/B07X1BH5FN/
 
 
 valves:
     LHD Series 3-Way Control Solenoid Valve
         5 V DC @ ~110 milliAmps
-    solder transistor to the valve so we can just use it with the hardware
+    solder transistors to the valve
+        https://www.amazon.com/McIgIcM-2N2222-Transistor-2N2222A-Through/dp/B06XPWS52G/
 
     TODO maybe have 2 different valves for gas and water?
+        to standardize water
+            regulator + fluid dispenser
 
 
-pressure measurement:
-    Adafruit MPRLS Ported Pressure Sensor Breakout - 0 to 25 PSI (3965)
-        so we can measure pressure for everything
+        pressure measurement:
+            Adafruit MPRLS Ported Pressure Sensor Breakout - 0 to 25 PSI (3965)
+                so we can measure air/water pressure
 
 
 lickport:
+    this isn't working and I have no idea why
+        this is the top priority for this subproject right now
+
     need to verify if we can sample at a high enough rate to use interrupts for the mouse licks
         https://learn.adafruit.com/adafruit-capacitive-touch-sensor-breakouts/downloads
         AT42QT1010 sends out a heartbeat pulse every once in a while
@@ -34,11 +42,6 @@ power:
     5 V DC wall converter
     12 V DC wall converter
 
-
-standardize water:
-    if we want to standardize the water pressure, we could use a regulator hooked up to pressurized water?
-        and then precisely time the solenoids
-        or we could release a very consistent amount of water
 
 
 
