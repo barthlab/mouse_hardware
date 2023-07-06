@@ -75,7 +75,7 @@ class PiCameraRecordingContextManager:
 
 
 
-def A(pin):
+def encoder_step_A(pin):
     global distance_marker_times
     distance_marker_times.append(time.monotonic_ns() / 1e9) # Seconds
 
@@ -105,7 +105,8 @@ def setup():
     GPIO.output(AIRPUFF_TTL_PULSE, GPIO.LOW)
     GPIO.output(VIDEO_TTL_PULSE, GPIO.LOW)
 
-    GPIO.add_event_detect(ENCODER_A_PIN, GPIO.RISING, callback=A)
+    GPIO.add_event_detect(ENCODER_A_PIN, GPIO.RISING, callback=encoder_step_A)
+    GPIO.add_event_detect(LICKPORT_PIN, GPIO.RISING, callback=lick)
 
 
 
