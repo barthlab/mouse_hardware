@@ -50,7 +50,7 @@ def nano_to_milli(nano):
     return(int(nano // 1e6))
 
 
-def extract_speeds_from_wheel_interrupts(times):
+def extract_speeds_from_distance_marker_times(times):
     wheel_perimeter = 46.5 / 100 # meters
     encoder_divisions = 1250 # divisions
     num_datapoints = len(times)
@@ -76,8 +76,8 @@ class PiCameraRecordingContextManager:
 
 
 def A(pin):
-    global running_distance_times
-    running_distance_times.append(time.monotonic_ns() / 1e9) # seconds
+    global distance_marker_times
+    distance_marker_times.append(time.monotonic_ns() / 1e9) # seconds
 
 
 
@@ -106,7 +106,7 @@ def setup():
 def main():
     """Run test"""
 
-    global running_distance_times
+    global distance_marker_times
 
     count = 0
 
@@ -161,8 +161,8 @@ def main():
                         time.sleep(inter_puff_delay)
 
                         # save run speed data
-                        times, running_distance_times = running_distance_times, []
-                        speeds = extract_speeds_from_wheel_interrupts(times)
+                        times, distance_marker_times = distance_marker_times, []
+                        speeds = extract_speeds_from_distance_marker_times(times)
 
                         for data in list(zip(times, speeds)):
                             run_writer.writerow(data)
@@ -172,8 +172,8 @@ def main():
 
                 time.sleep(final_delay)
 
-                times, running_distance_times = running_distance_times, []
-                speeds = extract_speeds_from_wheel_interrupts(times)
+                times, distance_marker_times = distance_marker_times, []
+                speeds = extract_speeds_from_distance_marker_times(times)
 
                 for data in list(zip(times, speeds)):
                     run_writer.writerow(data)
@@ -181,7 +181,7 @@ def main():
 
 
 if "__main__" == __name__:
-    running_distance_times = [] # time that the marker was hit
+    distance_marker_times = [] # time that the marker was hit
     setup()
     main()
     GPIO.cleanup()
