@@ -1,3 +1,7 @@
+cages are registered at:
+    netreg.net.cmu.edu
+
+
 new computer hardware:
     raspberry pi zero w
 
@@ -16,7 +20,7 @@ pressure measurement:
 
 
 lickport:
-    we need to use a larger capacitor or a different circuit to be able to sense at the frequency we want (6-10 Hz) bc we can currently see (0-7 Hz)
+    need to verify if we can sample at a high enough rate to use interrupts for the mouse licks
         https://learn.adafruit.com/adafruit-capacitive-touch-sensor-breakouts/downloads
         AT42QT1010 sends out a heartbeat pulse every once in a while
             https://cdn-learn.adafruit.com/assets/assets/000/009/807/original/proximity_AT42QT1010.png?1396897662
@@ -35,6 +39,10 @@ standardize water:
     if we want to standardize the water pressure, we could use a regulator hooked up to pressurized water?
         and then precisely time the solenoids
         or we could release a very consistent amount of water
+
+
+
+
 
 
 
