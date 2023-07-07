@@ -68,7 +68,7 @@ class PiCameraRecordingContextManager:
 
     def __enter__(self):
         self._camera = picamera.PiCamera()
-        camera.resolution = CAMERA_RESOLUTION
+        self._camera.resolution = CAMERA_RESOLUTION
         self._camera.start_recording(self._filename)
         return self._camera
 
