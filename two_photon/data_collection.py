@@ -12,6 +12,8 @@ import time
 import RPi.GPIO as GPIO
 import picamera
 
+# TODO make constants.py file for everything?
+CAMERA_RESOLUTION = (1024, 768)
 
 
 # Delay between running script and first trial start
@@ -50,6 +52,7 @@ def nano_to_milli(nano):
     return(int(nano // 1e6))
 
 
+# TODO remove this from here and put into post_processing.py
 def extract_speeds_from_distance_marker_times(times):
     wheel_perimeter = 46.5 / 100 # Meters
     encoder_divisions = 1250 # Divisions
@@ -65,6 +68,7 @@ class PiCameraRecordingContextManager:
 
     def __enter__(self):
         self._camera = picamera.PiCamera()
+        camera.resolution = CAMERA_RESOLUTION
         self._camera.start_recording(self._filename)
         return self._camera
 
