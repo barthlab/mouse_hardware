@@ -1,6 +1,6 @@
 # TODO convert wheel ticks to speed? here rather than in the code?
 
-
+import sys
 
 import cv2
 
@@ -9,31 +9,33 @@ import cv2
 # Constants for circle detection
 MIN_RADIUS = 15
 MAX_RADIUS = 100
+GRAYSCALE_THRESHOLD = 58
 DEBUG_CIRCLE_COLOR = 50
 OUTLINE_THICKNESS = 1
 
 
 
 # Global variables for rectangle selection
-rect = None
+point_a = None
+point_b = None
 rectangle_selected = False
 
 
 
 def select_rectangle(event, x, y, flags, param):
-    global rect, rectangle_selected
+    global point_a, point_b, rectangle_selected
 
     if not rectangle_selected:
         if event == cv2.EVENT_LBUTTONDOWN:
-            rect = (x, y)
+            point_a = (x, y)
         elif event == cv2.EVENT_LBUTTONUP:
-            rect = (rect[0], rect[1], x, y)
+            point_b = (x, y)
             rectangle_selected = True
 
 
 
-def detect_circle(frame, rect):
-    x1, y1, x2, y2 = rect
+def detect_circle(frame, point_a, point_b):
+    (x1, y1), (x2, y2) = point_a, point_b
     # Extract the region of interest
     roi = frame[y1:y2, x1:x2]
 
@@ -67,7 +69,7 @@ def process_capture(capture):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         # Process frame into binary threshold
-        ret1, frame = cv2.threshold(frame, 58, 255, cv2.THRESH_BINARY) # TODO move constants out
+        ret1, frame = cv2.threshold(frame, GRAYSCALE_THRESHOLD, 255, cv2.THRESH_BINARY)
 
     return(ret0, ret1, frame)
 
@@ -112,13 +114,13 @@ def main():
             break
 
         if not ret1:
-            print("Error: Failed to convert frame to grayscale and threshold")
+            print("Error: Failed to threshold frame")
             break
 
         # Draw selected rectangle
-        cv2.rectangle(frame, rect[0:2], rect[2:4], (0, 255, 0), 2)
+        cv2.rectangle(frame, point_a, point_b, (0, 255, 0), 2)
 
-        center, radius = detect_circle(frame, rect)
+        center, radius = detect_circle(frame, point_a, point_b)
 
         if radius != -1:
             cv2.circle(frame, center, int(radius), DEBUG_CIRCLE_COLOR, OUTLINE_THICKNESS)
