@@ -50,9 +50,9 @@ def detect_circle(frame, point_a, point_b):
         center = (int(x) + x1, int(y) + y1)
 
         if MIN_RADIUS < radius and radius < MAX_RADIUS:
-            return (center, radius)
+            return(center, radius)
 
-    return None, -1
+    return(None, None)
 
 
 
@@ -69,6 +69,7 @@ def process_capture(capture):
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
         # Process frame into binary threshold
+        # Any pixel over the GRAYSCALE_THRESHOLD will be turned to 255 (black)
         ret1, frame = cv2.threshold(frame, GRAYSCALE_THRESHOLD, 255, cv2.THRESH_BINARY)
 
     return(ret0, ret1, frame)
@@ -77,14 +78,16 @@ def process_capture(capture):
 
 def main():
     # Input vars
-    debug = True
-    video_path = '../data/mouse_video_pupil_alex.h264'
+    debug = True # TODO
+    video_path = '../data/mouse_video_pupil_alex.h264' # TODO
+    preview_frame_num = 100 # TODO
+    # TODO make output radius at each frame to csv (including None)
 
     # Load video file
     cap = cv2.VideoCapture(video_path)
 
-    # Get 100th frame to display preview
-    for _ in range(100):
+    # Get the preview frame
+    for _ in range(preview_frame_num):
         ret0, ret1, frame = process_capture(cap)
         if not (ret0 and ret1):
             sys.exit("Error parsing video")
@@ -117,19 +120,19 @@ def main():
             print("Error: Failed to threshold frame")
             break
 
-        # Draw selected rectangle
-        cv2.rectangle(frame, point_a, point_b, (0, 255, 0), 2)
-
+        # Get circle
         center, radius = detect_circle(frame, point_a, point_b)
 
-        if radius != -1:
-            cv2.circle(frame, center, int(radius), DEBUG_CIRCLE_COLOR, OUTLINE_THICKNESS)
-
         if debug:
-            cv2.imshow('Video', frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                break
+            # Draw selected rectangle
+            cv2.rectangle(frame, point_a, point_b, (0, 255, 0), 2)
 
+            # Draw circle if found
+            if radius is not None:
+                cv2.circle(frame, center, int(radius), DEBUG_CIRCLE_COLOR, OUTLINE_THICKNESS)
+
+            cv2.imshow('Video', frame)
+            cv2.waitKey(1)
 
     # Release resources
     cap.release()
