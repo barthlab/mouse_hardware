@@ -1,5 +1,7 @@
 # TODO convert wheel ticks to speed? here rather than in the code?
 
+import argparse
+import csv
 import sys
 
 import cv2
@@ -76,13 +78,17 @@ def process_capture(capture):
 
 
 
-def main():
-    # Input vars
-    debug = True # TODO
-    video_path = '../data/mouse_video_pupil_alex.h264' # TODO
-    preview_frame_num = 100 # TODO
-    # TODO make output radius at each frame to csv (including None)
+def save_to_csv(radius_values_path, radius_list):
+    with open(radius_values_path, "w", newline="") as file:
+        writer = csv.writer(file)
+        writer.writerow(["Time", "Radius"])
 
+        for row in radius_list:
+            writer.writerow(row)
+
+
+
+def main(debug, video_path, radius_path, preview_frame_num):
     # Load video file
     cap = cv2.VideoCapture(video_path)
 
@@ -104,12 +110,18 @@ def main():
     # Clear
     cv2.destroyAllWindows()
 
+    cv2.namedWindow("Video")
 
     # Because the old cap had the first 100 frames dropped
     cap = cv2.VideoCapture(video_path)
 
+    time_radius_list = []
+    time_base = 1 / cap.get(cv2.CAP_PROP_FPS)
+    frame_count = -1
+
     # Loop through video frames
     while True:
+        frame_count += 1
         ret0, ret1, frame = process_capture(cap)
 
         if not ret0:
@@ -120,8 +132,10 @@ def main():
             print("Error: Failed to threshold frame")
             break
 
-        # Get circle
+        # Get circle and time
         center, radius = detect_circle(frame, point_a, point_b)
+        time_in_video = frame_count * time_base
+        time_radius_list.append([time_in_video, radius])
 
         if debug:
             # Draw selected rectangle
@@ -131,14 +145,24 @@ def main():
             if radius is not None:
                 cv2.circle(frame, center, int(radius), DEBUG_CIRCLE_COLOR, OUTLINE_THICKNESS)
 
-            cv2.imshow('Video', frame)
+            cv2.imshow("Video", frame)
             cv2.waitKey(1)
 
     # Release resources
     cap.release()
     cv2.destroyAllWindows()
 
+    # Save radius values to CSV file
+    save_to_csv(radius_path, time_radius_list)
+
 
 
 if "__main__" == __name__:
-    main()
+    parser = argparse.ArgumentParser(description="Circle Detection")
+    parser.add_argument("--debug", action="store_true", help="Enable debug mode")
+    parser.add_argument("--video_path", required=True, type=str, help="Path to video file")
+    parser.add_argument("--radius_path", required=True, type=str, help="Path to write radius data")
+    parser.add_argument("--preview_frame_num", type=int, default=100, help="Frame number to preview")
+    args = parser.parse_args()
+
+    main(args.debug, args.video_path, args.radius_path, args.preview_frame_num)
