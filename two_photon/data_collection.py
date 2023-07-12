@@ -52,16 +52,6 @@ def nano_to_milli(nano):
     return(int(nano // 1e6))
 
 
-# TODO remove this from here and put into post_processing.py
-def extract_speeds_from_distance_marker_times(times):
-    wheel_perimeter = 46.5 / 100 # Meters
-    encoder_divisions = 1250 # Divisions
-    num_datapoints = len(times)
-    time_diffs = [times[1 + i] - times[i] for i in range(num_datapoints - 1)]
-    speeds = [wheel_perimeter / encoder_divisions / time_diffs[i] for i in range(num_datapoints - 1)]
-    return speeds
-
-
 class PiCameraRecordingContextManager:
     def __init__(self, filename):
         self._filename = filename
@@ -176,30 +166,38 @@ def main():
 
                             time.sleep(inter_puff_delay)
 
-                            # Convert distance_marker_times to speeds
+                            # Save current distance_marker_times
                             prev_distance_marker_times, distance_marker_times = distance_marker_times, []
-                            speeds = extract_speeds_from_distance_marker_times(prev_distance_marker_times)
 
                             # Save current lick_times
                             prev_lick_times, lick_times = lick_times, []
 
                             # Save data
-                            for data in list(zip(prev_distance_marker_times, speeds)):
+                            for data in list(prev_distance_marker_times):
                                 run_writer.writerow(data)
-                            puff_writer.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
+
                             for data in prev_lick_times:
                                 lick_writer.writerow([data])
+
+                            puff_writer.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
+
 
                             count += 1
 
                     time.sleep(final_delay)
 
+                    # Save current distance_marker_times
                     prev_distance_marker_times, distance_marker_times = distance_marker_times, []
-                    speeds = extract_speeds_from_distance_marker_times(prev_distance_marker_times)
 
-                    for data in list(zip(prev_distance_marker_times, speeds)):
+                    # Save current lick_times
+                    prev_lick_times, lick_times = lick_times, []
+
+                    # Save data
+                    for data in list(prev_distance_marker_times):
                         run_writer.writerow(data)
 
+                    for data in prev_lick_times:
+                        lick_writer.writerow([data])
 
 
 if "__main__" == __name__:

@@ -1,5 +1,3 @@
-# TODO convert wheel ticks to speed? here rather than in the code?
-
 import argparse
 import csv
 import sys
