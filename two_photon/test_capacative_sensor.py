@@ -6,9 +6,7 @@ Lickport test script for raspberry pi
 
 import RPi.GPIO as GPIO
 
-
-
-LICKPORT_PIN = 21
+import constants
 
 
 
@@ -20,9 +18,9 @@ def rising(pin):
 def setup():
     """Set up all the pins and set their initial values"""
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(LICKPORT_PIN, GPIO.IN)
+    GPIO.setup(constants.LICKPORT_PIN, GPIO.IN)
 
-    GPIO.add_event_detect(LICKPORT_PIN, GPIO.RISING, callback=rising)
+    GPIO.add_event_detect(constants.LICKPORT_PIN, GPIO.RISING, callback=rising)
 
 
 

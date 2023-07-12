@@ -12,9 +12,10 @@ import time
 
 import picamera
 
+import constants
 
 
-CAMERA_RESOLUTION = (1024, 768)
+
 PORT = 4443
 KEY_FILE = "/tmp/camera_preview_server.key"
 CERT_FILE = "/tmp/camera_preview_server.crt"
@@ -169,7 +170,7 @@ if "__main__" == __name__:
     print("Found certificate file and key file")
 
   with picamera.PiCamera() as camera:
-    camera.resolution = CAMERA_RESOLUTION
+    camera.resolution = constants.CAMERA_RESOLUTION
     output = StreamingOutput()
     camera.start_recording(output, format="mjpeg")
 

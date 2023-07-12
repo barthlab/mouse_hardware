@@ -12,8 +12,8 @@ import time
 import RPi.GPIO as GPIO
 import picamera
 
-# TODO make constants.py file for everything?
-CAMERA_RESOLUTION = (1024, 768)
+import constants
+
 
 
 # Delay between running script and first trial start
@@ -36,15 +36,6 @@ num_trains_in_trial = 1
 water_prob = 50 # %
 
 SAVE_DIR = "../data"
-
-LICKPORT_PIN = 21 # TODO add to code, use interrupts to count the licks on the lickport sensor
-WATER_SOLENOID_PIN = 8
-AIRPUFF_SOLENOID_PIN = 10
-FAKE_SOLENOID_PIN = 12
-ENCODER_A_PIN = 24
-ENCODER_B_PIN = 22 # To be able to tell direction
-AIRPUFF_TTL_PULSE = 11
-VIDEO_TTL_PULSE = 36
 
 
 
@@ -84,23 +75,23 @@ def lick(pin):
 def setup():
     """Set up all the pins and set their initial values"""
     GPIO.setmode(GPIO.BOARD)
-    GPIO.setup(LICKPORT_PIN, GPIO.IN)
-    GPIO.setup(WATER_SOLENOID_PIN, GPIO.OUT)
-    GPIO.setup(AIRPUFF_SOLENOID_PIN, GPIO.OUT)
-    GPIO.setup(ENCODER_A_PIN, GPIO.IN)
-    GPIO.setup(ENCODER_B_PIN, GPIO.IN)
-    GPIO.setup(FAKE_SOLENOID_PIN, GPIO.OUT)
-    GPIO.setup(AIRPUFF_TTL_PULSE, GPIO.OUT)
-    GPIO.setup(VIDEO_TTL_PULSE, GPIO.OUT)
+    GPIO.setup(constants.LICKPORT_PIN, GPIO.IN)
+    GPIO.setup(constants.WATER_SOLENOID_PIN, GPIO.OUT)
+    GPIO.setup(constants.AIRPUFF_SOLENOID_PIN, GPIO.OUT)
+    GPIO.setup(constants.ENCODER_A_PIN, GPIO.IN)
+    GPIO.setup(constants.ENCODER_B_PIN, GPIO.IN)
+    GPIO.setup(constants.FAKE_SOLENOID_PIN, GPIO.OUT)
+    GPIO.setup(constants.AIRPUFF_TTL_PULSE, GPIO.OUT)
+    GPIO.setup(constants.VIDEO_TTL_PULSE, GPIO.OUT)
 
-    GPIO.output(WATER_SOLENOID_PIN, GPIO.HIGH)
-    GPIO.output(AIRPUFF_SOLENOID_PIN, GPIO.HIGH)
-    GPIO.output(FAKE_SOLENOID_PIN, GPIO.HIGH)
-    GPIO.output(AIRPUFF_TTL_PULSE, GPIO.LOW)
-    GPIO.output(VIDEO_TTL_PULSE, GPIO.LOW)
+    GPIO.output(constants.WATER_SOLENOID_PIN, GPIO.HIGH)
+    GPIO.output(constants.AIRPUFF_SOLENOID_PIN, GPIO.HIGH)
+    GPIO.output(constants.FAKE_SOLENOID_PIN, GPIO.HIGH)
+    GPIO.output(constants.AIRPUFF_TTL_PULSE, GPIO.LOW)
+    GPIO.output(constants.VIDEO_TTL_PULSE, GPIO.LOW)
 
-    GPIO.add_event_detect(ENCODER_A_PIN, GPIO.RISING, callback=encoder_step_A)
-    GPIO.add_event_detect(LICKPORT_PIN, GPIO.RISING, callback=lick)
+    GPIO.add_event_detect(constants.ENCODER_A_PIN, GPIO.RISING, callback=encoder_step_A)
+    GPIO.add_event_detect(constants.LICKPORT_PIN, GPIO.RISING, callback=lick)
 
 
 
@@ -115,17 +106,17 @@ def main():
     filename = input("what do you want to save the experiment as?\n")
 
     with open(f"{SAVE_DIR}/puff_data_{filename}.csv", "w") as puff_data_file:
-        with open(f"{SAVE_DIR}/run_data_{filename}.csv", "w") as run_data_file:
+        with open(f"{SAVE_DIR}/distance_data_{filename}.csv", "w") as distance_data_file:
             with open(f"{SAVE_DIR}/lick_data_{filename}.csv", "w") as lick_data_file:
 
                 puff_writer = csv.writer(puff_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-                run_writer = csv.writer(run_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+                distance_writer = csv.writer(distance_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 lick_writer = csv.writer(lick_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
                 with PiCameraRecordingContextManager(f"{SAVE_DIR}/mouse_video_{filename}.h264") as camera:
                     # Send a short pulse
-                    GPIO.output(VIDEO_TTL_PULSE, GPIO.HIGH)
-                    GPIO.output(VIDEO_TTL_PULSE, GPIO.LOW)
+                    GPIO.output(constants.VIDEO_TTL_PULSE, GPIO.HIGH)
+                    GPIO.output(constants.VIDEO_TTL_PULSE, GPIO.LOW)
 
                     time.sleep(initial_delay)
 
@@ -137,23 +128,23 @@ def main():
 
                             # Randomly choose whether to use a real solenoid or a fake one
                             puff_string = "fake"
-                            tmp_solenoid_pin = FAKE_SOLENOID_PIN
-                            tmp_water_pin = FAKE_SOLENOID_PIN
+                            tmp_solenoid_pin = constants.FAKE_SOLENOID_PIN
+                            tmp_water_pin = constants.FAKE_SOLENOID_PIN
                             if (random.random() * 100 > water_prob):
                                 puff_string = "real"
-                                tmp_water_pin = WATER_SOLENOID_PIN
-                                tmp_solenoid_pin = AIRPUFF_SOLENOID_PIN
+                                tmp_water_pin = constants.WATER_SOLENOID_PIN
+                                tmp_solenoid_pin = constants.AIRPUFF_SOLENOID_PIN
 
                             print(puff_string)
 
                             # Air puff / fake air puff
                             GPIO.output(tmp_solenoid_pin, GPIO.LOW)
                             solenoid_on = nano_to_milli(time.monotonic_ns())
-                            GPIO.output(AIRPUFF_TTL_PULSE, GPIO.HIGH)
+                            GPIO.output(constants.AIRPUFF_TTL_PULSE, GPIO.HIGH)
                             time.sleep(air_time)
                             GPIO.output(tmp_solenoid_pin, GPIO.HIGH)
                             solenoid_off = nano_to_milli(time.monotonic_ns())
-                            GPIO.output(AIRPUFF_TTL_PULSE, GPIO.LOW)
+                            GPIO.output(constants.AIRPUFF_TTL_PULSE, GPIO.LOW)
 
                             time.sleep(air_puff_to_water_release_time)
 
@@ -174,7 +165,7 @@ def main():
 
                             # Save data
                             for data in list(prev_distance_marker_times):
-                                run_writer.writerow(data)
+                                distance_writer.writerow(data)
 
                             for data in prev_lick_times:
                                 lick_writer.writerow([data])
@@ -194,7 +185,7 @@ def main():
 
                     # Save data
                     for data in list(prev_distance_marker_times):
-                        run_writer.writerow(data)
+                        distance_writer.writerow(data)
 
                     for data in prev_lick_times:
                         lick_writer.writerow([data])
