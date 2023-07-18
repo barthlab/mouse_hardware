@@ -3,6 +3,8 @@ import csv
 import sys
 
 import cv2
+import tkinter as tk
+from tkinter import filedialog
 
 
 
@@ -12,6 +14,14 @@ MAX_RADIUS = 100
 GRAYSCALE_THRESHOLD = 58
 DEBUG_CIRCLE_COLOR = 50
 OUTLINE_THICKNESS = 1
+
+
+
+def select_file():
+    root = tk.Tk()
+    root.withdraw()
+    file_path = filedialog.askopenfilename()
+    return file_path
 
 
 
@@ -158,9 +168,16 @@ def main(debug, video_path, radius_path, preview_frame_num):
 if "__main__" == __name__:
     parser = argparse.ArgumentParser(description="Circle Detection")
     parser.add_argument("--debug", action="store_true", help="Enable debug mode")
-    parser.add_argument("--video_path", required=True, type=str, help="Path to video file")
-    parser.add_argument("--radius_path", required=True, type=str, help="Path to write radius data")
+    parser.add_argument("--video_path", type=str, help="Path to video file")
+    parser.add_argument("--radius_path", type=str, help="Path to write radius data")
     parser.add_argument("--preview_frame_num", type=int, default=100, help="Frame number to preview")
     args = parser.parse_args()
 
+    if args.video_path is None:
+        args.video_path = select_file()
+
+    if args.radius_path is None:
+        args.radius_path = "run_data_" + args.video_path.replace("run_data_", "distance_data_") # TODO use prefix
+
     main(args.debug, args.video_path, args.radius_path, args.preview_frame_num)
+

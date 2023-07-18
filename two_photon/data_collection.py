@@ -105,9 +105,9 @@ def main():
 
     filename = input("what do you want to save the experiment as?\n")
 
-    with open(f"{SAVE_DIR}/puff_data_{filename}.csv", "w") as puff_data_file:
-        with open(f"{SAVE_DIR}/distance_data_{filename}.csv", "w") as distance_data_file:
-            with open(f"{SAVE_DIR}/lick_data_{filename}.csv", "w") as lick_data_file:
+    with open(f"{SAVE_DIR}/puff_data_{filename}.csv", "w") as puff_data_file: # TODO make prefix variable
+        with open(f"{SAVE_DIR}/distance_data_{filename}.csv", "w") as distance_data_file: # TODO make prefix variable
+            with open(f"{SAVE_DIR}/lick_data_{filename}.csv", "w") as lick_data_file: # TODO make prefix variable
 
                 puff_writer = csv.writer(puff_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                 distance_writer = csv.writer(distance_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
