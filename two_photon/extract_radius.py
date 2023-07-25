@@ -173,8 +173,6 @@ if "__main__" == __name__:
     parser.add_argument("--preview_frame_num", type=int, default=100, help="Frame number to preview")
     args = parser.parse_args()
 
-    print(args)
-
     if args.video_path is None:
         args.video_path = select_file()
 
