@@ -37,9 +37,9 @@ def main(times_path, speed_path):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Circle Detection")
-    parser.add_argument("--times_path", required=True, type=str, help="Path to times file")
-    parser.add_argument("--speed_path", required=True, type=str, help="Path to write speed data")
+    parser = argparse.ArgumentParser(description="Convert the time that the mouse moved a certain distance to the speed")
+    parser.add_argument("--distance_path", required=True, type=str, help="Path to distance data file")
+    parser.add_argument("--speed_path", required=True, type=str, help="Path to write speed data file")
     args = parser.parse_args()
 
     main(args.times_path, args.speed_path)

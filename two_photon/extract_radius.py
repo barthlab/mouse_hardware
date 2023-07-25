@@ -166,7 +166,7 @@ def main(debug, video_path, radius_path, preview_frame_num):
 
 
 if "__main__" == __name__:
-    parser = argparse.ArgumentParser(description="Circle Detection")
+    parser = argparse.ArgumentParser(description="Detect a mouse's pupil radius given video of a mouse")
     parser.add_argument("--no_debug", action="store_true", help="Disable debug mode")
     parser.add_argument("--video_path", type=str, help="Path to video file")
     parser.add_argument("--radius_path", type=str, help="Path to write radius data")
