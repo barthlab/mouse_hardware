@@ -38,3 +38,7 @@ Raspberry Pi Information:
                 enable camera
                 enable ssh
             # need to make raspberry pi automatically connect to CMU-DEVICE
+
+
+need to install opencv-python and tk to run pupil diameter analysis code
+    pip install opencv-python tk
