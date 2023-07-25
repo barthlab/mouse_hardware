@@ -49,7 +49,7 @@ class PiCameraRecordingContextManager:
 
     def __enter__(self):
         self._camera = picamera.PiCamera()
-        self._camera.resolution = CAMERA_RESOLUTION
+        self._camera.resolution = constants.CAMERA_RESOLUTION
         self._camera.start_recording(self._filename)
         return self._camera
 
@@ -165,7 +165,7 @@ def main():
 
                             # Save data
                             for data in list(prev_distance_marker_times):
-                                distance_writer.writerow(data)
+                                distance_writer.writerow([data])
 
                             for data in prev_lick_times:
                                 lick_writer.writerow([data])

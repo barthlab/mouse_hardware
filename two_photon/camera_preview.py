@@ -22,7 +22,7 @@ CERT_FILE = "/tmp/camera_preview_server.crt"
 PAGE = f"""\
 <html>
 <body>
-<img src="stream.mjpg" width="{CAMERA_RESOLUTION[0]}" height="{CAMERA_RESOLUTION[1]}"/>
+<img src="stream.mjpg" width="{constants.CAMERA_RESOLUTION[0]}" height="{constants.CAMERA_RESOLUTION[1]}"/>
 </body>
 </html>
 """
