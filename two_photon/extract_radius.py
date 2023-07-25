@@ -167,17 +167,19 @@ def main(debug, video_path, radius_path, preview_frame_num):
 
 if "__main__" == __name__:
     parser = argparse.ArgumentParser(description="Circle Detection")
-    parser.add_argument("--debug", action="store_true", help="Enable debug mode")
+    parser.add_argument("--no_debug", action="store_true", help="Disable debug mode")
     parser.add_argument("--video_path", type=str, help="Path to video file")
     parser.add_argument("--radius_path", type=str, help="Path to write radius data")
     parser.add_argument("--preview_frame_num", type=int, default=100, help="Frame number to preview")
     args = parser.parse_args()
 
+    print(args)
+
     if args.video_path is None:
         args.video_path = select_file()
 
     if args.radius_path is None:
-        args.radius_path = "run_data_" + args.video_path.replace("run_data_", "distance_data_") # TODO use prefix
+        args.radius_path = args.video_path.replace("mouse_video_", "pupil_data_").replace(".h264", ".csv")
 
-    main(args.debug, args.video_path, args.radius_path, args.preview_frame_num)
+    main(not args.no_debug, args.video_path, args.radius_path, args.preview_frame_num)
 
