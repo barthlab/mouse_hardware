@@ -29,15 +29,10 @@ Raspberry Pi Information:
     ssh user@2p-barthlab.wifi.local.cmu.edu
     MAC = b8:27:eb:79:2b:09
     raspberry pi model 3b v1.2
-    view ip address through getonline.cmu.edu (you should be automatically added to the group if you are on the payroll)
     reinstall raspberry pi:
         https://www.raspberrypi.com/software/operating-systems/
+        make raspberry pi connect to CMU-DEVICE
         commands to set up the pi:
             sudo raspi-config
                 enable camera
                 enable ssh
-            # need to make raspberry pi automatically connect to CMU-DEVICE
-
-
-need to install opencv-python and tk to run pupil diameter analysis code
-    pip install opencv-python tk
