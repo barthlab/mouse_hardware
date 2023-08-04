@@ -1,7 +1,3 @@
-cages are registered at:
-    netreg.net.cmu.edu
-
-
 new computer hardware:
     raspberry pi zero (does not need to be w)
     add ethernet
@@ -25,17 +21,7 @@ valves:
 
 
 lickport:
-    this isn't working and I have no idea why
-        this is the top priority for this subproject right now
-
-    need to verify if we can sample at a high enough rate to use interrupts for the mouse licks
-        https://learn.adafruit.com/adafruit-capacitive-touch-sensor-breakouts/downloads
-        AT42QT1010 sends out a heartbeat pulse every once in a while
-            https://cdn-learn.adafruit.com/assets/assets/000/009/807/original/proximity_AT42QT1010.png?1396897662
-                C1:
-                    22 nF
-                    2 - 50 nF
-                    decrease it to increase response time
+    mouse's tongue will complete circuit, should be simpler than current situation
 
 
 power:
