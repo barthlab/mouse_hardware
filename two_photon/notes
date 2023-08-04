@@ -1,7 +1,7 @@
 Connection Diagram:
     water<----(relay)---------------
     air puff<-(relay)---------------
-    walking---(encoder)------------>Raspberry Pi ---(ssh)-------------->computer
+    walking---(encoder)------------>Raspberry Pi<---(ssh)-------------->computer
     licks-----(capacitive sensor)-->  ||                                  ^^
                                       ||                                  ||
                                       ||                                  ||
@@ -26,8 +26,7 @@ Connection Diagram:
 
 
 Raspberry Pi Information:
-    ssh user@barthlabrpi.wifi.local.cmu.edu
-    password = check Alex's notebook, page 3
+    ssh user@2p-barthlab.wifi.local.cmu.edu
     MAC = b8:27:eb:79:2b:09
     raspberry pi model 3b v1.2
     view ip address through getonline.cmu.edu (you should be automatically added to the group if you are on the payroll)
