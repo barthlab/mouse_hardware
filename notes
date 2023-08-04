@@ -1,15 +1,48 @@
-previous person's notes:
-    hostname = barthlabpi
-    MAC = B8:27:EB:2C:7E:5C
+Use getonline.cmu.edu to connect all devices
 
-    Ethernet password -> install Arduino
+NOTE: no need to use a public IP address ever
 
-    pw = barthlab
-        192.168.137.4
-        netmask: 255.255.255.0
-        MAC: 00-E0-8C-68-02-B3
-        192.168.137.4/24
+NOTE: you have to be on the same subnetwork as the ethernet devices to connect to them
 
-    SLC051 IR - last imaged ?Jan/Jun? 13
-    SLC048 IL -
-    SLC056 IR
+NOTE: some settings may take up to 45 minutes to take effect, other settings may take longer, sometimes disconnecting and reconnecting and reconnecting the device helps
+
+Connect device to Wifi:
+    https://getonline.cmu.edu
+    select "Connect to CMU-DEVICE"
+        Hostname: "DEVICE_NAME-barthlab.wifi.local.cmu.edu"
+        MAC Address: put the device's MAC address for wifi here
+        submit
+            if error "MAC address already registered" check if device was already on getonline, if not, contact IT help
+
+Connect device to Ethernet:
+    https://getonline.cmu.edu
+    select "Manage Your Network Registrations"
+    select "register new device"
+        scroll to bottom
+            Building: "Mellon Institute"
+            Network: "private"
+            Hostname: "DEVICE_NAME-barthlab.lan.local.cmu.edu"
+            MAC Address: put the device's MAC address for ethernet here
+            check this box: "register device for group or department"
+                Group: "barthlab"
+                NOTE: if you do not see "barthlab" then it is possible that you are not on the payroll
+                NOTE: it is important to do this step because if not, other peope in the lab can't see and modify this device
+            submit
+                if error "MAC address already registered" check if device was already on getonline, if not, contact IT help
+
+To view managed devices:
+    https://getonline.cmu.edu
+    select "Manage Your Network Registrations"
+        The 2 sections that should have all the devices are:
+        Wired Devices
+            Departmental Devices
+        and
+        Wireless Devices
+            Departmental Devices
+        if a device is not in these two and it is associated with barthlab, change its group to be "barthlab"
+
+To modify managed devices:
+    first view the device
+    click the device's hostname
+        change what you need to change & hit submit
+            if error, contact IT help
