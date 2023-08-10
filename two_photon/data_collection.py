@@ -40,7 +40,7 @@ SAVE_DIR = "../data"
 
 
 def nano_to_milli(nano):
-    return(int(nano // 1e6))
+    return(nano / 1e6)
 
 
 class PiCameraRecordingContextManager:
