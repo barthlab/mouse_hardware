@@ -193,7 +193,7 @@ def main():
 
                         # Save data
                         for data in list(prev_distance_marker_times):
-                            distance_writer.writerow(data)
+                            distance_writer.writerow([data])
 
                         for data in prev_lick_times:
                             lick_writer.writerow([data])
