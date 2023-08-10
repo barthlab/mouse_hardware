@@ -186,6 +186,7 @@ if "__main__" == __name__:
       server.handle_request()
       server.handle_request()
       server.handle_request()
+      server.handle_request()
 
       while True:
         pass
