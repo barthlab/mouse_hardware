@@ -91,7 +91,7 @@ def setup():
     GPIO.output(constants.VIDEO_TTL_PULSE, GPIO.LOW)
 
     GPIO.add_event_detect(constants.ENCODER_A_PIN, GPIO.RISING, callback=encoder_step_A)
-    GPIO.add_event_detect(constants.LICKPORT_PIN, GPIO.RISING, callback=lick)
+    GPIO.add_event_detect(constants.LICKPORT_PIN, GPIO.CHANGING, callback=lick)
 
 
 
