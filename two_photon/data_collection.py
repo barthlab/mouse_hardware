@@ -62,13 +62,13 @@ class PiCameraRecordingContextManager:
 
 def encoder_step_A(pin):
     global distance_marker_times
-    distance_marker_times.append(time.monotonic_ns() / 1e9) # Seconds
+    distance_marker_times.append(nano_to_milli(time.monotonic_ns())) # Seconds
 
 
 
 def lick(pin):
     global lick_times
-    lick_times.append(time.monotonic_ns() / 1e9) # Seconds
+    lick_times.append(nano_to_milli(time.monotonic_ns())) # Seconds
 
 
 
