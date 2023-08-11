@@ -11,11 +11,21 @@ from tkinter import filedialog
 
 
 # Constants for circle detection
-MIN_RADIUS = 15
+MIN_RADIUS = 8
 MAX_RADIUS = 100
-GRAYSCALE_THRESHOLD = 58
+GRAYSCALE_THRESHOLD = 90
 DEBUG_CIRCLE_COLOR = 50
 OUTLINE_THICKNESS = 1
+
+
+
+# Global variable for clicked point
+clicked_point = None
+
+def on_mouse_click(event, x, y, flags, param):
+    global clicked_point
+    if event == cv2.EVENT_LBUTTONDOWN:
+        clicked_point = (x, y)
 
 
 
@@ -24,47 +34,6 @@ def select_file():
     root.withdraw()
     file_path = filedialog.askopenfilename()
     return file_path
-
-
-
-# Global variables for rectangle selection
-point_a = None
-point_b = None
-rectangle_selected = False
-
-
-
-def select_rectangle(event, x, y, flags, param):
-    global point_a, point_b, rectangle_selected
-
-    if not rectangle_selected:
-        if event == cv2.EVENT_LBUTTONDOWN:
-            point_a = (x, y)
-        elif event == cv2.EVENT_LBUTTONUP:
-            point_b = (x, y)
-            rectangle_selected = True
-
-
-
-def detect_circle(frame, point_a, point_b):
-    (x1, y1), (x2, y2) = point_a, point_b
-    # Extract the region of interest
-    roi = frame[y1:y2, x1:x2]
-
-    contours, _ = cv2.findContours(roi, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
-
-    for contour in contours:
-        area = cv2.contourArea(contour)
-
-        (x, y), radius = cv2.minEnclosingCircle(contour)
-
-        # Calculate the center coordinates in the original frame
-        center = (int(x) + x1, int(y) + y1)
-
-        if MIN_RADIUS < radius and radius < MAX_RADIUS:
-            return(center, radius)
-
-    return(None, None)
 
 
 
@@ -85,6 +54,29 @@ def process_capture(capture):
         ret1, frame = cv2.threshold(frame, GRAYSCALE_THRESHOLD, 255, cv2.THRESH_BINARY)
 
     return(ret0, ret1, frame)
+
+
+
+def detect_closest_circle(frame, clicked_point):
+    if clicked_point is None:
+        return None, None
+
+    contours, _ = cv2.findContours(frame, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+
+    closest_center = None
+    closest_radius = None
+    min_distance = float('inf')
+
+    for contour in contours:
+        (x, y), radius = cv2.minEnclosingCircle(contour)
+        distance = cv2.norm((x, y), clicked_point)
+
+        if MIN_RADIUS < radius < MAX_RADIUS and distance < min_distance:
+            min_distance = distance
+            closest_center = (int(x), int(y))
+            closest_radius = radius
+
+    return closest_center, closest_radius
 
 
 
@@ -111,10 +103,10 @@ def main(debug, video_path, radius_path, preview_frame_num):
     # Make preview window to get region of interest
     cv2.namedWindow("Preview")
     cv2.imshow("Preview", frame)
-    cv2.setMouseCallback("Preview", select_rectangle)
+    cv2.setMouseCallback("Preview", on_mouse_click)
 
     # Wait until we have our region of interest
-    while not rectangle_selected:
+    while None == clicked_point:
         cv2.waitKey(1)
 
     # Clear
@@ -122,52 +114,37 @@ def main(debug, video_path, radius_path, preview_frame_num):
 
     cv2.namedWindow("Video")
 
-    # Because the old cap had the first 100 frames dropped
-    cap = cv2.VideoCapture(video_path)
-
     time_radius_list = []
     time_base = 1 / cap.get(cv2.CAP_PROP_FPS)
     frame_count = -1
 
-    # Loop through video frames
     while True:
         frame_count += 1
         ret0, ret1, frame = process_capture(cap)
 
-        if not ret0:
+        if not ret0 or not ret1:
             print("Error: Failed to read frame from the video")
             break
 
-        if not ret1:
-            print("Error: Failed to threshold frame")
-            break
-
-        # Get circle and time
-        center, radius = detect_circle(frame, point_a, point_b)
+        center, radius = detect_closest_circle(frame, clicked_point)
         time_in_video = frame_count * time_base
         time_radius_list.append([time_in_video, radius])
 
         if debug:
-            # Draw selected rectangle
-            cv2.rectangle(frame, point_a, point_b, (0, 255, 0), 2)
-
-            # Draw circle if found
-            if radius is not None:
+            if center is not None:
                 cv2.circle(frame, center, int(radius), DEBUG_CIRCLE_COLOR, OUTLINE_THICKNESS)
 
             cv2.imshow("Video", frame)
             cv2.waitKey(1)
 
-    # Release resources
     cap.release()
     cv2.destroyAllWindows()
 
-    # Save radius values to CSV file
     save_to_csv(radius_path, time_radius_list)
 
 
 
-if "__main__" == __name__:
+if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Detect a mouse's pupil radius given video of a mouse")
     parser.add_argument("--no_debug", action="store_true", help="Disable debug mode")
     parser.add_argument("--video_path", type=str, help="Path to video file")
