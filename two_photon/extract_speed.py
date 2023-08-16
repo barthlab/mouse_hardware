@@ -43,4 +43,4 @@ if __name__ == "__main__":
     parser.add_argument("--distance_path", required=True, type=str, help="Path to distance data file")
     args = parser.parse_args()
 
-    main(args.distance_path, args.distance_path.replace("distance_data_", "speed_data_"))
+    main(args.distance_path, args.distance_path.replace(constants.DIST_PREFIX, constants.SPEED_PREFIX))
