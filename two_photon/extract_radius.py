@@ -4,6 +4,7 @@ import argparse
 import csv
 import sys
 
+import numpy as np
 import cv2
 import tkinter as tk
 from tkinter import filedialog
@@ -11,11 +12,10 @@ from tkinter import filedialog
 
 
 # Constants for circle detection
-MIN_RADIUS = 8
-MAX_RADIUS = 100
-GRAYSCALE_THRESHOLD = 90
-DEBUG_CIRCLE_COLOR = 50
-OUTLINE_THICKNESS = 1
+MIN_RADIUS = 5
+MAX_RADIUS = 50
+DEBUG_CIRCLE_COLOR = 0
+DEBUG_CIRCLE_THICKNESS = 1
 
 
 
@@ -38,9 +38,6 @@ def select_file():
 
 
 def process_capture(capture):
-    # Default
-    ret1 = False
-
     # Grab the frame
     ret0, frame = capture.read()
 
@@ -49,25 +46,32 @@ def process_capture(capture):
         # Process frame into grayscale
         frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-        # Process frame into binary threshold
-        # Any pixel over the GRAYSCALE_THRESHOLD will be turned to 255 (black)
-        ret1, frame = cv2.threshold(frame, GRAYSCALE_THRESHOLD, 255, cv2.THRESH_BINARY)
-
-    return(ret0, ret1, frame)
+    return(ret0, frame)
 
 
 
-def detect_closest_circle(frame, clicked_point):
+def detect_circle(frame, clicked_point, fill_diff_threshold):
     if clicked_point is None:
-        return None, None
+        return frame, None, None
 
-    contours, _ = cv2.findContours(frame, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
+    height, width = frame.shape[:2]
+    mask = np.zeros((height + 2, width + 2), np.uint8)
+
+    # Perform flood fill starting from the clicked point
+    cv2.floodFill(frame, mask, seedPoint=clicked_point, newVal=(255, 255, 255), loDiff=(fill_diff_threshold, fill_diff_threshold, fill_diff_threshold), upDiff=(fill_diff_threshold, fill_diff_threshold, fill_diff_threshold))
+
+    # get the contour for the clicked point
+    contours, _ = cv2.findContours(mask, cv2.RETR_LIST, cv2.CHAIN_APPROX_SIMPLE)
 
     closest_center = None
     closest_radius = None
     min_distance = float('inf')
 
+    # if there are somehow multiple contours, we get the closest one
+    # if there are no contours, return frame, None, None
+    # if there are contours, but they are too large/small return frame, None, None
     for contour in contours:
+
         (x, y), radius = cv2.minEnclosingCircle(contour)
         distance = cv2.norm((x, y), clicked_point)
 
@@ -76,7 +80,7 @@ def detect_closest_circle(frame, clicked_point):
             closest_center = (int(x), int(y))
             closest_radius = radius
 
-    return closest_center, closest_radius
+    return frame, closest_center, closest_radius
 
 
 
@@ -90,52 +94,42 @@ def save_to_csv(radius_values_path, radius_list):
 
 
 
-def main(debug, video_path, radius_path, preview_frame_num):
-    # Load video file
+def main(video_path, radius_path, fill_diff_threshold):
+    global clicked_point
+
     cap = cv2.VideoCapture(video_path)
 
-    # Get the preview frame
-    for _ in range(preview_frame_num):
-        ret0, ret1, frame = process_capture(cap)
-        if not (ret0 and ret1):
-            sys.exit("Error parsing video")
-
-    # Make preview window to get region of interest
-    cv2.namedWindow("Preview")
-    cv2.imshow("Preview", frame)
-    cv2.setMouseCallback("Preview", on_mouse_click)
-
-    # Wait until we have our region of interest
-    while None == clicked_point:
-        cv2.waitKey(1)
-
-    # Clear
-    cv2.destroyAllWindows()
-
     cv2.namedWindow("Video")
+    cv2.setMouseCallback("Video", on_mouse_click)
 
     time_radius_list = []
     time_base = 1 / cap.get(cv2.CAP_PROP_FPS)
     frame_count = -1
 
     while True:
-        frame_count += 1
-        ret0, ret1, frame = process_capture(cap)
 
-        if not ret0 or not ret1:
+        frame_count += 1
+        ret0, frame = process_capture(cap)
+
+        if not ret0:
             print("Error: Failed to read frame from the video")
             break
 
-        center, radius = detect_closest_circle(frame, clicked_point)
+        mask, center, radius = detect_circle(frame, clicked_point, fill_diff_threshold)
+
+        while center is None:
+            mask, center, radius = detect_circle(frame, clicked_point, fill_diff_threshold)
+            cv2.imshow("Video", mask)
+            cv2.waitKey(1)
+
         time_in_video = frame_count * time_base
         time_radius_list.append([time_in_video, radius])
 
-        if debug:
-            if center is not None:
-                cv2.circle(frame, center, int(radius), DEBUG_CIRCLE_COLOR, OUTLINE_THICKNESS)
+        cv2.circle(frame, center, int(radius), DEBUG_CIRCLE_COLOR, DEBUG_CIRCLE_THICKNESS)
 
-            cv2.imshow("Video", frame)
-            cv2.waitKey(1)
+        cv2.imshow("Video", frame)
+        cv2.waitKey(1)
+
 
     cap.release()
     cv2.destroyAllWindows()
@@ -146,10 +140,9 @@ def main(debug, video_path, radius_path, preview_frame_num):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Detect a mouse's pupil radius given video of a mouse")
-    parser.add_argument("--no_debug", action="store_true", help="Disable debug mode")
     parser.add_argument("--video_path", type=str, help="Path to video file")
     parser.add_argument("--radius_path", type=str, help="Path to write radius data")
-    parser.add_argument("--preview_frame_num", type=int, default=100, help="Frame number to preview")
+    parser.add_argument("--fill_diff_threshold", default=4, type=int, help="Threshold for the difference in pixel values [0, 255]")
     args = parser.parse_args()
 
     if args.video_path is None:
@@ -158,5 +151,5 @@ if __name__ == "__main__":
     if args.radius_path is None:
         args.radius_path = args.video_path.replace("mouse_video_", "pupil_data_").replace(".h264", ".csv")
 
-    main(not args.no_debug, args.video_path, args.radius_path, args.preview_frame_num)
+    main(args.video_path, args.radius_path, args.fill_diff_threshold)
 
