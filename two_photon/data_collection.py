@@ -105,15 +105,20 @@ def main():
 
     filename = input("what do you want to save the experiment as?\n")
 
-    with open(f"{SAVE_DIR}/ttl_data_{filename}.csv", "w") as ttl_data_file: # TODO make prefix variable
-        with open(f"{SAVE_DIR}/puff_data_{filename}.csv", "w") as puff_data_file: # TODO make prefix variable
-            with open(f"{SAVE_DIR}/distance_data_{filename}.csv", "w") as distance_data_file: # TODO make prefix variable
-                with open(f"{SAVE_DIR}/lick_data_{filename}.csv", "w") as lick_data_file: # TODO make prefix variable
+    with open(f"{SAVE_DIR}/{constants.TTL_PREFIX}{filename}.csv", "w") as ttl_data_file:
+        with open(f"{SAVE_DIR}/{constants.PUFF_PREFIX}{filename}.csv", "w") as puff_data_file:
+            with open(f"{SAVE_DIR}/{constants.DIST_PREFIX}{filename}.csv", "w") as distance_data_file:
+                with open(f"{SAVE_DIR}/{constants.LICK_PREFIX}{filename}.csv", "w") as lick_data_file:
 
                     ttl_writer = csv.writer(ttl_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                     puff_writer = csv.writer(puff_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                     distance_writer = csv.writer(distance_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
                     lick_writer = csv.writer(lick_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+                    ttl_writer.writerow(["type", "time"])
+                    puff_writer.writerow(["type", "count", "solenoid on time", "solenoid off time", "water on time", "water off time"])
+                    distance_writer.writerow(["time"])
+                    lick_writer.writerow(["time"])
 
                     with PiCameraRecordingContextManager(f"{SAVE_DIR}/mouse_video_{filename}.h264") as camera:
                         # Send a short pulse
