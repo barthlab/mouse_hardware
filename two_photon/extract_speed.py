@@ -3,6 +3,7 @@
 import argparse
 import csv
 
+import constants
 
 
 WHEEL_PERIMETER = 46.5 / 100 # Meters
