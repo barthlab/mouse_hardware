@@ -120,7 +120,7 @@ def main():
                     distance_writer.writerow(["time"])
                     lick_writer.writerow(["time"])
 
-                    with PiCameraRecordingContextManager(f"{SAVE_DIR}/mouse_video_{filename}.h264") as camera:
+                    with PiCameraRecordingContextManager(f"{SAVE_DIR}/{constants.VIDEO_PREFIX}{filename}.h264") as camera:
                         # Send a short pulse
                         ttl = nano_to_milli(time.monotonic_ns())
                         GPIO.output(constants.VIDEO_TTL_PULSE, GPIO.HIGH)
