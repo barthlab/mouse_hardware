@@ -22,7 +22,7 @@ def extract_speeds_from_distance_marker_times(times):
 def save_to_csv(speed_path, time_speed_list):
     with open(speed_path, "w+", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(["Time", "Speed"])
+        writer.writerow(["time", "speed"])
 
         for time, speed in time_speed_list:
             writer.writerow([time, speed])
@@ -32,6 +32,7 @@ def save_to_csv(speed_path, time_speed_list):
 def main(times_path, speed_path):
     with open(times_path, "r") as file:
         reader = csv.reader(file)
+        next(reader) # skip header
         times = [float(row[0]) for row in reader]
 
     speeds = extract_speeds_from_distance_marker_times(times)

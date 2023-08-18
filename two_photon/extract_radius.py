@@ -12,8 +12,8 @@ from tkinter import filedialog
 
 
 # Constants for circle detection
-MIN_RADIUS = 5
-MAX_RADIUS = 50
+MIN_RADIUS = 3
+MAX_RADIUS = 40
 DEBUG_CIRCLE_COLOR = 0
 DEBUG_CIRCLE_THICKNESS = 1
 
@@ -87,7 +87,7 @@ def detect_circle(frame, clicked_point, fill_diff_threshold):
 def save_to_csv(radius_values_path, radius_list):
     with open(radius_values_path, "w", newline="") as file:
         writer = csv.writer(file)
-        writer.writerow(["Time", "Radius"])
+        writer.writerow(["time", "radius"])
 
         for row in radius_list:
             writer.writerow(row)
