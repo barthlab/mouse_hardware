@@ -7,7 +7,7 @@ import constants
 
 SAVE_DIR = "../data/"
 
-name = "alex_with_air" # TODO make command line parameter
+name = "alex_with_air_2" # TODO make command line parameter
 ttl_data_path = f"{SAVE_DIR}{constants.TTL_PREFIX}{name}.csv"
 puff_file_path = f"{SAVE_DIR}{constants.PUFF_PREFIX}{name}.csv"
 lick_file_path = f"{SAVE_DIR}{constants.LICK_PREFIX}{name}.csv"
@@ -35,7 +35,7 @@ puff_types = []
 # Read "puff" times from CSV file
 with open(ttl_data_path, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
-    #next(csv_reader)
+    next(csv_reader)
     for row in csv_reader:
         if len(row) >= 2:
             puff_time = float(row[1])
@@ -44,7 +44,7 @@ with open(ttl_data_path, "r") as csv_file:
 # Read "puff" types from CSV file
 with open(puff_file_path, "r") as csv_file:
     csv_reader = csv.reader(csv_file)
-    #next(csv_reader)
+    next(csv_reader)
     for row in csv_reader:
         if len(row) >= 2:
             puff_type = row[0]
