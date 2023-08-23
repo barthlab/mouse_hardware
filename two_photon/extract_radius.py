@@ -13,7 +13,7 @@ from tkinter import filedialog
 
 # Constants for circle detection
 MIN_RADIUS = 3
-MAX_RADIUS = 40
+MAX_RADIUS = 35
 DEBUG_CIRCLE_COLOR = 0
 DEBUG_CIRCLE_THICKNESS = 1
 
