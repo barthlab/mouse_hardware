@@ -108,8 +108,6 @@ def main():
     global distance_marker_times
     global lick_times
 
-    count = 0
-
     filename = input("what do you want to save the experiment as?\n")
 
     with open(f"{SAVE_DIR}/{constants.TTL_PREFIX}{filename}.csv", "w") as ttl_data_file:
@@ -123,7 +121,7 @@ def main():
                     lick_writer = csv.writer(lick_data_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
 
                     ttl_writer.writerow(["type", "time"])
-                    puff_writer.writerow(["type", "count", "solenoid on time", "solenoid off time", "water on time", "water off time"])
+                    puff_writer.writerow(["type", "solenoid on time", "solenoid off time", "water on time", "water off time"])
                     distance_writer.writerow(["time"])
                     lick_writer.writerow(["time"])
 
@@ -190,10 +188,7 @@ def main():
                                 for data in prev_lick_times:
                                     lick_writer.writerow(data)
 
-                                puff_writer.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
-
-
-                                count += 1
+                                puff_writer.writerow([puff_string, solenoid_on, solenoid_off, water_on, water_off])
 
                         time.sleep(final_delay)
 
