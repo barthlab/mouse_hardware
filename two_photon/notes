@@ -1,3 +1,6 @@
+If data_collection.py script fails to run, run:
+    sudo pigpiod
+
 Connection Diagram:
     water<----(relay)---------------
     air puff<-(relay)---------------
