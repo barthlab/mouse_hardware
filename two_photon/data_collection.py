@@ -62,13 +62,19 @@ class PiCameraRecordingContextManager:
 
 def encoder_step_A(pin):
     global distance_marker_times
-    distance_marker_times.append(nano_to_milli(time.monotonic_ns())) # Seconds
+    distance_marker_times.append([nano_to_milli(time.monotonic_ns())]) # Seconds
 
 
 
-def lick(pin):
+def start_lick(pin):
     global lick_times
-    lick_times.append(nano_to_milli(time.monotonic_ns())) # Seconds
+    lick_times.append(["start", nano_to_milli(time.monotonic_ns())]) # Seconds
+
+
+
+def stop_lick(pin):
+    global lick_times
+    lick_times.append(["stop", nano_to_milli(time.monotonic_ns())]) # Seconds
 
 
 
@@ -91,7 +97,8 @@ def setup():
     GPIO.output(constants.VIDEO_TTL_PULSE, GPIO.LOW)
 
     GPIO.add_event_detect(constants.ENCODER_A_PIN, GPIO.RISING, callback=encoder_step_A)
-    GPIO.add_event_detect(constants.LICKPORT_PIN, GPIO.BOTH, callback=lick)
+    GPIO.add_event_detect(constants.LICKPORT_PIN, GPIO.RISING, callback=start_lick)
+    GPIO.add_event_detect(constants.LICKPORT_PIN, GPIO.FALLING, callback=stop_lick)
 
 
 
@@ -178,10 +185,10 @@ def main():
                                 ttl_writer.writerow(["puff", ttl])
 
                                 for data in list(prev_distance_marker_times):
-                                    distance_writer.writerow([data])
+                                    distance_writer.writerow(data)
 
                                 for data in prev_lick_times:
-                                    lick_writer.writerow([data])
+                                    lick_writer.writerow(data)
 
                                 puff_writer.writerow([puff_string, count, solenoid_on, solenoid_off, water_on, water_off])
 
@@ -198,10 +205,10 @@ def main():
 
                         # Save data
                         for data in list(prev_distance_marker_times):
-                            distance_writer.writerow([data])
+                            distance_writer.writerow(data)
 
                         for data in prev_lick_times:
-                            lick_writer.writerow([data])
+                            lick_writer.writerow(data)
 
 
 if "__main__" == __name__:
