@@ -9,6 +9,7 @@ import csv
 import random
 import time
 
+import gpiozero
 import RPi.GPIO as GPIO
 import picamera
 
@@ -97,8 +98,10 @@ def setup():
     GPIO.output(constants.VIDEO_TTL_PULSE, GPIO.LOW)
 
     GPIO.add_event_detect(constants.ENCODER_A_PIN, GPIO.RISING, callback=encoder_step_A)
-    GPIO.add_event_detect(constants.LICKPORT_PIN, GPIO.RISING, callback=start_lick)
-    GPIO.add_event_detect(constants.LICKPORT_PIN, GPIO.FALLING, callback=stop_lick)
+
+    button = gpiozero.Button(constants.LICKPORT_PIN)
+    button.when_pressed = start_lick
+    button.when_released = stop_lick
 
 
 
