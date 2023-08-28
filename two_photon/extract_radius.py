@@ -4,6 +4,8 @@ import argparse
 import csv
 import sys
 
+import constants
+
 import numpy as np
 import cv2
 import tkinter as tk
@@ -141,15 +143,12 @@ def main(video_path, radius_path, fill_diff_threshold):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Detect a mouse's pupil radius given video of a mouse")
     parser.add_argument("--video_path", type=str, help="Path to video file")
-    parser.add_argument("--radius_path", type=str, help="Path to write radius data")
     parser.add_argument("--fill_diff_threshold", default=4, type=int, help="Threshold for the difference in pixel values [0, 255]")
     args = parser.parse_args()
 
     if args.video_path is None:
         args.video_path = select_file()
 
-    if args.radius_path is None:
-        args.radius_path = args.video_path.replace("mouse_video_", "pupil_data_").replace(".h264", ".csv")
+    args.radius_path = args.video_path.replace(constants.VIDEO_PREFIX, constants.PUPIL_PREFIX).replace(".h264", ".csv")
 
     main(args.video_path, args.radius_path, args.fill_diff_threshold)
-

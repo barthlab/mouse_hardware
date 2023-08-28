@@ -5,6 +5,10 @@ import csv
 
 import constants
 
+import tkinter as tk
+from tkinter import filedialog
+
+
 
 WHEEL_PERIMETER = 46.5 / 100 # Meters
 ENCODER_DIVISIONS = 1250 # Divisions
@@ -45,4 +49,9 @@ if __name__ == "__main__":
     parser.add_argument("--distance_path", required=True, type=str, help="Path to distance data file")
     args = parser.parse_args()
 
-    main(args.distance_path, args.distance_path.replace(constants.DIST_PREFIX, constants.SPEED_PREFIX))
+    if args.distance_path is None:
+        args.distance_path = select_file()
+
+    args.speed_path = args.distance_path.replace(constants.DIST_PREFIX, constants.SPEED_PREFIX)
+
+    main(args.distance_path, args.speed_path)
