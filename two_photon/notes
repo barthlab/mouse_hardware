@@ -1,3 +1,6 @@
+To install python libraries:
+    pip install opencv-python tk numpy
+
 If data_collection.py script fails to run, run:
     sudo pigpiod
 
