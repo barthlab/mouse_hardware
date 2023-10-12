@@ -1,4 +1,7 @@
-To install python libraries:
+Raspberry Pi install python libraries:
+    pip install tk numpy
+
+Analysis computer install python libraries:
     pip install opencv-python tk numpy
 
 If data_collection.py script fails to run, run:
